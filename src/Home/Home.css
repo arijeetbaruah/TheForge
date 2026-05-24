@@ -1,0 +1,172 @@
+﻿body {
+    min-height: 100vh;
+    background: #1a1208;
+    background-image:
+            radial-gradient(ellipse at 20% 50%, #2a1a0855 0%, transparent 60%),
+            radial-gradient(ellipse at 80% 20%, #1a100555 0%, transparent 50%);
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem 1rem;
+    font-family: 'IM Fell English', Georgia, serif;
+}
+
+.page-wrap { position: relative; width: 100%; max-width: 680px; }
+
+.parchment {
+    position: relative;
+    background: #f4e8c1;
+    border-radius: 2px;
+    padding: 3.5rem 3.5rem 4rem;
+    box-shadow:
+            0 0 0 1px #8b6914,
+            0 0 0 3px #c9a227,
+            0 4px 8px #00000055,
+            0 20px 60px #00000077,
+            inset 0 0 80px #c8a96622,
+            inset 0 0 20px #a0784433;
+}
+
+.parchment::before {
+    content: ''; position: absolute; inset: 0; border-radius: 2px;
+    background:
+            radial-gradient(ellipse at 0% 0%, #a07840aa 0%, transparent 25%),
+            radial-gradient(ellipse at 100% 0%, #8b6432aa 0%, transparent 20%),
+            radial-gradient(ellipse at 0% 100%, #8b6432aa 0%, transparent 20%),
+            radial-gradient(ellipse at 100% 100%, #a07840aa 0%, transparent 25%);
+    pointer-events: none;
+}
+
+.corner-ornament {
+    position: absolute; width: 40px; height: 40px;
+    color: #8b6914; opacity: 0.5; font-size: 1.5rem;
+    display: flex; align-items: center; justify-content: center;
+}
+.corner-ornament.tl { top: 12px; left: 12px; }
+.corner-ornament.tr { top: 12px; right: 12px; transform: scaleX(-1); }
+.corner-ornament.bl { bottom: 12px; left: 12px; transform: scaleY(-1); }
+.corner-ornament.br { bottom: 12px; right: 12px; transform: scale(-1); }
+
+.parchment-title {
+    font-family: 'UnifrakturMaguntia', cursive;
+    color: #1a0f05; font-size: 2.8rem; text-align: center;
+    letter-spacing: .05em; line-height: 1; margin-bottom: .25rem;
+    text-shadow: 1px 1px 0 #c8a06644;
+}
+
+.parchment-subtitle {
+    font-family: 'Cinzel', serif; color: #5a3e1b;
+    font-size: .7rem; text-align: center;
+    letter-spacing: .3em; text-transform: uppercase; margin-bottom: 0;
+}
+
+.ink-divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 1.25rem 0 1.75rem; color: #8b6914; opacity: .6;
+}
+.ink-divider::before, .ink-divider::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, #8b691488, transparent);
+}
+
+.ink-label {
+    display: block; font-family: 'Cinzel', serif;
+    font-size: .65rem; letter-spacing: .18em;
+    text-transform: uppercase; color: #3d2810; margin-bottom: .4rem;
+}
+
+.ink-input, .ink-select, .parchment select, .parchment input[type=text],
+.parchment input[type=number] {
+    width: 100%; background: transparent;
+    border: none; border-bottom: 1.5px solid #5a3e1b88;
+    border-radius: 0; padding: .4rem .25rem .35rem;
+    font-family: 'Kalam', cursive; font-size: 1rem;
+    color: #1a0f05; outline: none; transition: border-color .2s;
+    -webkit-appearance: none; appearance: none;
+}
+
+.parchment select:focus, .parchment input:focus {
+    border-bottom-color: #1a0f05;
+    background: linear-gradient(180deg, transparent 95%, #1a0f0508 100%);
+}
+
+.parchment select option { font-family: serif; color: #1a0f05; background: #f4e8c1; }
+
+.select-wrap { position: relative; }
+.select-wrap::after {
+    content: '\f0d7'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    color: #5a3e1b; font-size: .75rem; pointer-events: none;
+}
+
+.ink-check-wrap {
+    display: flex; align-items: center; gap: 10px; padding: .5rem 0;
+    border-bottom: 1px dashed #8b691444;
+}
+.ink-check-wrap input[type=checkbox] { width: 16px; height: 16px; accent-color: #3d2810; }
+.ink-check-label {
+    font-family: 'Kalam', cursive; font-size: .95rem;
+    color: #2a1a08; cursor: pointer; font-style: italic;
+}
+
+.section-rule { border: none; border-top: 1px solid #8b691433; margin: 1.5rem 0; }
+
+.wax-seal-wrap { text-align: center; margin-top: 2rem; }
+
+.wax-seal-btn {
+    display: inline-flex; flex-direction: column; align-items: center;
+    justify-content: center; width: 110px; height: 110px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #c0392b, #7b1818 60%, #4a0f0f);
+    border: none; cursor: pointer;
+    box-shadow:
+            0 4px 12px #00000077, 0 0 0 3px #8b1a1a,
+            0 0 0 5px #c0392b44, inset 0 2px 4px #ffffff22,
+            inset 0 -2px 4px #00000044;
+    transition: all .2s; color: #f5d4c0; position: relative;
+    font-family: 'Cinzel', serif; font-size: .55rem;
+    letter-spacing: .15em; text-transform: uppercase;
+}
+.wax-seal-btn::before {
+    content: ''; position: absolute; inset: 8px; border-radius: 50%;
+    border: 1px solid #ffffff22;
+}
+.wax-seal-btn i { font-size: 1.4rem; margin-bottom: 3px; }
+.wax-seal-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px #00000088, 0 0 0 3px #8b1a1a,
+    0 0 0 5px #c0392b66, inset 0 2px 4px #ffffff22,
+    inset 0 -2px 4px #00000044;
+}
+.wax-seal-btn:active { transform: scale(.97); }
+
+.seal-caption {
+    font-family: 'Cinzel', serif; font-size: .6rem; letter-spacing: .2em;
+    color: #5a3e1b; text-transform: uppercase; margin-top: .75rem; opacity: .7;
+}
+
+.task-id-note {
+    font-family: 'Kalam', cursive; font-size: .75rem;
+    color: #8b6440; font-style: italic; text-align: right;
+    margin-top: 2rem; opacity: .6;
+}
+
+.parchment-footer {
+    text-align: center; font-family: 'IM Fell English', serif;
+    font-style: italic; font-size: .8rem; color: #7a5c30;
+    margin-top: 1.5rem; opacity: .7;
+}
+
+.alert-parchment {
+    background: #f9e8c0; border: 1px solid #8b1a1a;
+    border-radius: 2px; color: #5a0f0f;
+    font-family: 'Kalam', cursive; font-size: .95rem;
+    padding: .6rem 1rem; margin-bottom: 1.25rem; font-style: italic;
+}
+
+.parchment label:not(.ink-check-label) {
+    font-family: 'Cinzel', serif; font-size: .65rem;
+    letter-spacing: .18em; text-transform: uppercase;
+    color: #3d2810; margin-bottom: .4rem; display: block;
+}
+.parchment .form-check-label {
+    font-family: 'Kalam', cursive; font-size: .95rem;
+    color: #2a1a08; font-style: italic;
+}
