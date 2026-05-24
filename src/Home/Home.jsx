@@ -1,7 +1,11 @@
 import React from 'react'
+import _ from 'underscore';
 
 import Select from 'react-select'
 import { Button, Container, Form } from 'react-bootstrap'
+
+import SheetService from '../SheetService.js'
+import Category from "../Entity/Category.js";
 
 import "./Home.css"
 import Img from "./img.svg"
@@ -12,14 +16,13 @@ class ForgeCommissionForm extends React.Component {
         super(props);
 
         this.state = {
-            discordId: "",
-            character: "",
-            category: null,
-            baseItem: null,
-            enchantment: null,
-            providingBase: false,
-            // Populated from /api/all-items on mount
-            allItems: [],
+            discordId:      "",
+            character:      "",
+            category:       null,   // { value, label } | null
+            baseItem:       null,
+            enchantment:    null,
+            providingBase:  false,
+            allItems:       [],
             allEnchantments: [],
         };
 
@@ -28,11 +31,10 @@ class ForgeCommissionForm extends React.Component {
 
     async componentDidMount() {
         try {
-            const res  = await fetch('/api/all-items');
-            const data = await res.json();
+            const response = await SheetService.fetchAll();
             this.setState({
-                allItems:        data.items        ?? [],
-                allEnchantments: data.enchantments ?? [],
+                allItems:        response.items,
+                allEnchantments: response.enchantments,
             });
         } catch (e) {
             console.error('Failed to load forge data', e);
@@ -42,47 +44,52 @@ class ForgeCommissionForm extends React.Component {
     onSubmit(e) {
         e.preventDefault();
         // TODO: wire up your submission logic here
+
+        console.log(this.state);
     }
 
     handleCategoryChange(selected) {
-        // Reset dependent selects when category changes
         this.setState({ category: selected, baseItem: null, enchantment: null });
     }
 
     getFilteredItems() {
         const { category, allItems } = this.state;
         if (!category) return [];
-        return allItems
-            .filter(i => i.category === category.value)
-            .map(i => ({ value: String(i.id), label: i.name }));
+
+        return _.chain(allItems)
+            .filter((item) => item.Category === category.value)
+            .map((item, idx) => ({ value: idx, label: item.itemName }))
+            .value();
     }
 
     getFilteredEnchantments() {
         const { category, allEnchantments } = this.state;
         if (!category) return [];
-        return allEnchantments
-            .filter(e => e.category === category.value)
-            .map(e => ({ value: String(e.id), label: e.name }));
+
+        return _.chain(allEnchantments)
+            .filter((enc) => enc.Category === category.value)
+            .map((enc, idx) => ({ value: idx, label: enc.name }))
+            .value();
     }
 
     render() {
         const { discordId, character, category, baseItem, enchantment, providingBase } = this.state;
 
         const categoryOptions = [
-            { value: 'weapon',     label: 'Weapon'     },
-            { value: 'armor',      label: 'Armor'      },
-            { value: 'consumable', label: 'Consumable' },
-            { value: 'poison',     label: 'Poison'     },
+            { value: Category.weapon,     label: 'Weapon'     },
+            { value: Category.armor,      label: 'Armor'      },
+            { value: Category.consumable, label: 'Consumable' },
+            { value: Category.poison,     label: 'Poison'     },
         ];
 
         const selectStyles = {
-            control:     (b) => ({ ...b, background: 'transparent', border: 'none', borderBottom: '1.5px solid #5a3e1b88', borderRadius: 0, boxShadow: 'none', fontFamily: "'Kalam', cursive", fontSize: '1rem', color: '#1a0f05' }),
-            menu:        (b) => ({ ...b, background: '#f4e8c1', fontFamily: "'Kalam', cursive" }),
-            option:      (b, s) => ({ ...b, background: s.isSelected ? '#5a3e1b' : s.isFocused ? '#e8d89a' : 'transparent', color: s.isSelected ? '#f4e8c1' : '#1a0f05' }),
-            singleValue: (b) => ({ ...b, color: '#1a0f05' }),
-            placeholder: (b) => ({ ...b, color: '#5a3e1b88' }),
-            indicator:   (b) => ({ ...b, color: '#5a3e1b' }),
-            indicatorSeparator: () => ({ display: 'none' }),
+            control:            (b) => ({ ...b, background: 'transparent', border: 'none', borderBottom: '1.5px solid #5a3e1b88', borderRadius: 0, boxShadow: 'none', fontFamily: "'Kalam', cursive", fontSize: '1rem', color: '#1a0f05' }),
+            menu:               (b) => ({ ...b, background: '#f4e8c1', fontFamily: "'Kalam', cursive" }),
+            option:             (b, s) => ({ ...b, background: s.isSelected ? '#5a3e1b' : s.isFocused ? '#e8d89a' : 'transparent', color: s.isSelected ? '#f4e8c1' : '#1a0f05' }),
+            singleValue:        (b) => ({ ...b, color: '#1a0f05' }),
+            placeholder:        (b) => ({ ...b, color: '#5a3e1b88' }),
+            indicator:          (b) => ({ ...b, color: '#5a3e1b' }),
+            indicatorSeparator: ()  => ({ display: 'none' }),
         };
 
         return (
