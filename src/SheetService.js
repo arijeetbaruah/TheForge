@@ -3,7 +3,7 @@ import Currency, { unit } from "./Entity/Currency.js";
 import Category from "./Entity/Category.js";
 import Enchantment, { tier } from "./Entity/Enchantment.js";
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0SThGJW0DpITXAspBCjIYdR9Q4ehR8-NCNyyLvS42YiUvYXocf_qwQC6aeOS9i1uR8w/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEzR4nVYIfeAnNQKBNC5CHh7-hBDZb0iWjmCVLSLRUEI-cWDd5Sl3Iv5ByWtEGiOF3JA/exec";
 
 // Keys are the raw strings coming from the sheet
 const CATEGORY_MAP = {
@@ -59,6 +59,41 @@ const SheetService = {
             items:        (data.items        ?? []).map(rowToMundaneItem),
             enchantments: (data.enchantments ?? []).map(rowToEnchantment),
         };
+    },
+
+    /**
+     * Submits a commission order to the Orders sheet.
+     * @param {{ taskId, discordId, character, category, baseItem, enchantment, providingBase, quantity }} order
+     * @returns {Promise<{ success: boolean, taskId: string }>}
+     */
+    async submitOrder(order) {
+        const res = await fetch(APPS_SCRIPT_URL, {
+            method:  "POST",
+            // text/plain avoids a CORS preflight — Apps Script requires this
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({
+                taskId:        order.taskId,
+                discordId:     order.discordId,
+                character:     order.character,
+                category:      order.category?.label   ?? "",
+                baseItem:      order.baseItem?.label    ?? "",
+                enchantment:   order.enchantment?.label ?? "",
+                quantity:      order.quantity,
+                providingBase: order.providingBase      ?? false,
+            }),
+        });
+
+        if (!res.ok) {
+            throw new Error(`SheetService.submitOrder: request failed — ${res.status} ${res.statusText}`);
+        }
+
+        const data = await res.json();
+
+        if (!data.success) {
+            throw new Error(`SheetService.submitOrder: ${data.error}`);
+        }
+
+        return data;
     },
 };
 

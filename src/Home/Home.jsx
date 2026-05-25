@@ -9,6 +9,7 @@ import Category from "../Entity/Category.js";
 
 import "./Home.css"
 import Img from "./img.svg"
+import CommissionReceipt from "./CommissionReceipt.jsx";
 
 class ForgeCommissionForm extends React.Component {
 
@@ -21,7 +22,10 @@ class ForgeCommissionForm extends React.Component {
             category:       null,   // { value, label } | null
             baseItem:       null,
             enchantment:    null,
+            quantity:       1,
             providingBase:  false,
+            submitted:      false,
+            taskId:         "",
             allItems:       [],
             allEnchantments: [],
         };
@@ -41,11 +45,16 @@ class ForgeCommissionForm extends React.Component {
         }
     }
 
-    onSubmit(e) {
+    async onSubmit(e) {
         e.preventDefault();
-        // TODO: wire up your submission logic here
+        const taskId = crypto.randomUUID();
+        const { discordId, character, category, baseItem, enchantment, providingBase, quantity } = this.state;
 
-        console.log(this.state);
+        await SheetService.submitOrder({
+            taskId, discordId, character, category, baseItem, enchantment, providingBase, quantity
+        });
+
+        this.setState({ submitted: true, taskId });
     }
 
     handleCategoryChange(selected) {
@@ -73,7 +82,14 @@ class ForgeCommissionForm extends React.Component {
     }
 
     render() {
-        const { discordId, character, category, baseItem, enchantment, providingBase } = this.state;
+        const { taskId, discordId, character, category, baseItem, quantity, enchantment, providingBase, submitted } = this.state;
+
+        if (submitted){
+            return (<CommissionReceipt data = {{
+                taskId, discordId, character, category, baseItem, enchantment, providingBase, quantity
+            }}
+           onBack={() => this.setState({ submitted: false })}/>);
+        }
 
         const categoryOptions = [
             { value: Category.weapon,     label: 'Weapon'     },
@@ -191,6 +207,17 @@ class ForgeCommissionForm extends React.Component {
                                     styles={selectStyles}
                                 />
                             </div>
+                        </Form.Group>
+
+                        <Form.Group className="col-12" controlId="formQuantity">
+                            <Form.Label className="ink-label">
+                                <i className="fas fa-hashtag fa-xs me-1"></i> Quantity
+                            </Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={quantity}
+                                onChange={(e) => this.setState({ quantity: e.target.value })}
+                            />
                         </Form.Group>
 
                         {/* ── Provide base item ── */}

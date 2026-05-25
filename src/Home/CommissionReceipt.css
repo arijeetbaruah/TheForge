@@ -1,0 +1,198 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&family=Kalam:wght@300;400&display=swap');
+
+body {
+    min-height: 100vh;
+    background: #1a1208;
+    background-image:
+            radial-gradient(ellipse at 20% 50%, #2a1a0855 0%, transparent 60%),
+            radial-gradient(ellipse at 80% 20%, #1a100555 0%, transparent 50%);
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem 1rem;
+    font-family: 'IM Fell English', Georgia, serif;
+}
+
+.page-wrap { position: relative; width: 100%; max-width: 520px; }
+
+.parchment {
+    position: relative;
+    background: #f0e2b0;
+    border-radius: 1px;
+    padding: 3rem 3rem 3.5rem;
+    transform: rotate(-0.4deg);
+    box-shadow:
+            0 0 0 1px #7a5c10,
+            0 0 0 2px #c9a22766,
+            0 6px 12px #00000066,
+            0 24px 70px #00000088,
+            inset 0 0 100px #c8a96630,
+            inset 0 0 30px #a0784440;
+}
+
+.parchment::before {
+    content: ''; position: absolute; inset: 0; border-radius: 1px;
+    background:
+            radial-gradient(ellipse at 0% 0%, #8a6030cc 0%, transparent 30%),
+            radial-gradient(ellipse at 100% 0%, #7a5020bb 0%, transparent 25%),
+            radial-gradient(ellipse at 0% 100%, #7a5020bb 0%, transparent 25%),
+            radial-gradient(ellipse at 100% 100%, #8a6030cc 0%, transparent 30%),
+            radial-gradient(ellipse at 30% 60%, #c8a06615 0%, transparent 40%),
+            radial-gradient(ellipse at 70% 30%, #c8a06610 0%, transparent 35%);
+    pointer-events: none;
+}
+
+.parchment::after {
+    content: ''; position: absolute;
+    top: 22%; left: 12%;
+    width: 4px; height: 4px;
+    background: #2a1a0e;
+    border-radius: 50%; opacity: 0.12;
+    box-shadow:
+            40px 10px 0 2px #2a1a0e18,
+            -10px 60px 0 1px #2a1a0e15,
+            180px 40px 0 3px #2a1a0e10,
+            150px -10px 0 1px #2a1a0e12;
+    pointer-events: none;
+}
+
+.corner-ornament {
+    position: absolute; width: 36px; height: 36px;
+    color: #7a5c10; opacity: 0.45; font-size: 1.3rem;
+    display: flex; align-items: center; justify-content: center;
+}
+.corner-ornament.tl { top: 10px; left: 10px; }
+.corner-ornament.tr { top: 10px; right: 10px; transform: scaleX(-1); }
+.corner-ornament.bl { bottom: 10px; left: 10px; transform: scaleY(-1); }
+.corner-ornament.br { bottom: 10px; right: 10px; transform: scale(-1); }
+
+.tear-top {
+    position: absolute; top: -6px; left: 0; right: 0; height: 10px;
+    background: #f0e2b0;
+    clip-path: polygon(
+            0% 100%, 2% 20%, 4% 80%, 6% 10%, 9% 70%, 12% 30%, 15% 85%,
+            18% 15%, 21% 75%, 24% 25%, 27% 90%, 30% 20%, 33% 80%, 36% 10%,
+            39% 65%, 42% 30%, 45% 85%, 48% 15%, 51% 70%, 54% 25%, 57% 88%,
+            60% 20%, 63% 75%, 66% 10%, 69% 65%, 72% 30%, 75% 85%, 78% 15%,
+            81% 70%, 84% 25%, 87% 80%, 90% 10%, 93% 65%, 96% 30%, 98% 80%, 100% 20%, 100% 100%
+    );
+}
+
+.tear-bottom {
+    position: absolute; bottom: -6px; left: 0; right: 0; height: 10px;
+    background: #f0e2b0;
+    clip-path: polygon(
+            0% 0%, 2% 80%, 5% 20%, 8% 90%, 11% 35%, 14% 70%, 17% 15%,
+            20% 85%, 23% 25%, 26% 75%, 29% 10%, 32% 80%, 35% 20%, 38% 90%,
+            41% 35%, 44% 70%, 47% 15%, 50% 85%, 53% 25%, 56% 75%, 59% 10%,
+            62% 80%, 65% 20%, 68% 88%, 71% 35%, 74% 70%, 77% 15%, 80% 85%,
+            83% 25%, 86% 75%, 89% 10%, 92% 80%, 95% 20%, 98% 85%, 100% 30%, 100% 0%
+    );
+}
+
+.receipt-header {
+    font-family: 'Cinzel', serif;
+    font-size: .65rem; letter-spacing: .3em;
+    text-transform: uppercase; color: #5a3e1b;
+    text-align: center; margin-bottom: 1.5rem; opacity: .7;
+}
+
+.parchment-title {
+    font-family: 'UnifrakturMaguntia', cursive;
+    color: #1a0f05; font-size: 2.2rem; text-align: center;
+    letter-spacing: .05em; line-height: 1.1; margin-bottom: 1.5rem;
+    text-shadow: 1px 1px 0 #c8a06633;
+}
+
+.receipt-body {
+    font-family: 'Kalam', cursive;
+    color: #1a0f05; font-size: 1rem;
+    line-height: 1.9;
+    border-bottom: 1px dashed #8b691444;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.receipt-body .field-line {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px dotted #8b691422; padding: .2rem 0;
+}
+
+.receipt-body .field-name {
+    font-family: 'Cinzel', serif; font-size: .6rem;
+    letter-spacing: .15em; text-transform: uppercase;
+    color: #5a3e1b; opacity: .8;
+}
+
+.receipt-body .field-value {
+    font-family: 'Kalam', cursive; font-size: .95rem;
+    color: #1a0f05; font-style: italic;
+    text-align: right; max-width: 65%;
+}
+
+.task-id-wrap {
+    text-align: center;
+    margin: 1.25rem 0 1rem;
+}
+
+.task-id-label {
+    font-family: 'Cinzel', serif; font-size: .6rem;
+    letter-spacing: .2em; text-transform: uppercase;
+    color: #5a3e1b; opacity: .7; display: block; margin-bottom: .4rem;
+}
+
+.task-id {
+    font-family: 'Kalam', cursive;
+    font-size: 1rem; color: #1a0f05;
+    letter-spacing: .08em;
+    background: #e8d49022;
+    border: 1px dashed #8b691466;
+    border-radius: 2px;
+    padding: .4rem 1rem;
+    display: inline-block;
+}
+
+.wax-stamp {
+    position: absolute;
+    bottom: -20px; right: 30px;
+    width: 70px; height: 70px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #c0392b, #7b1818 60%, #4a0f0f);
+    box-shadow:
+            0 3px 8px #00000066,
+            0 0 0 2px #8b1a1a,
+            0 0 0 4px #c0392b33,
+            inset 0 2px 3px #ffffff22;
+    display: flex; align-items: center; justify-content: center;
+    color: #f5d4c0; font-size: .55rem;
+    font-family: 'Cinzel', serif; letter-spacing: .1em;
+    flex-direction: column; transform: rotate(12deg);
+}
+
+.wax-stamp::before {
+    content: ''; position: absolute; inset: 6px; border-radius: 50%;
+    border: 1px solid #ffffff1a;
+}
+
+.wax-stamp i { font-size: 1.1rem; margin-bottom: 2px; }
+
+.ink-divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 1rem 0; color: #8b6914; opacity: .5;
+}
+.ink-divider::before, .ink-divider::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, #8b691466, transparent);
+}
+
+.back-link {
+    display: block; text-align: center; margin-top: 1.5rem;
+    font-family: 'Cinzel', serif; font-size: .65rem;
+    letter-spacing: .2em; text-transform: uppercase;
+    color: #5a3e1b; text-decoration: none;
+    opacity: .7; transition: opacity .2s;
+}
+.back-link:hover { opacity: 1; color: #3d2810; }
+
+.parchment-footer {
+    text-align: center; font-family: 'IM Fell English', serif;
+    font-style: italic; font-size: .75rem; color: #7a5c30;
+    margin-top: 1.5rem; opacity: .6;
+}
