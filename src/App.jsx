@@ -1,38 +1,77 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import 'bootstrap/dist/css/bootstrap.css';
+import React from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { onAuthStateChanged } from 'firebase/auth'
+import { auth } from './firebase/auth.js'
 
-import Home from './Home/Home.jsx'
+import 'bootstrap/dist/css/bootstrap.css'
 
-function About() {
-  return <h1>About Page</h1>;
+import Home  from './Home/Home.jsx'
+import Login from './Login.jsx'
+
+function ProtectedRoute({ user, children }) {
+    if (user === undefined) return null;
+    if (user === null)      return <Navigate to="/login" replace />;
+    return children;
 }
 
-function Contact() {
-  return <h1>Contact Page</h1>;
+function GuestRoute({ user, children }) {
+    return children;
 }
 
-function App() {
-  return (
-      <BrowserRouter>
-          {/*<nav class="navbar navbar-default">
-              <div className="container-fluid">
-                  <div className="navbar-header">
-                      <a className="navbar-brand" href="#">WebSiteName</a>
-                  </div>
-                  <ul className="nav navbar-nav">
-                      <Link to="/">Home</Link>
-                      <Link to="/about">About</Link>
-                      <Link to="/contact">Contact</Link>
-                  </ul>
-              </div>
-          </nav>*/}
-          <Routes>
-              <Route path="/" element={<Home/>}/>
-              <Route path="/about" element={<About/>}/>
-              <Route path="/contact" element={<Contact/>}/>
-          </Routes>
-      </BrowserRouter>
-);
+function AdminDashboard() {
+    return (<>Hi</>);
 }
 
-export default App
+class App extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = { user: undefined };
+    }
+
+    componentDidMount() {
+        this.unsubscribe = onAuthStateChanged(auth, (u) => {
+            this.setState({ user: u ?? null });
+        });
+    }
+
+    componentWillUnmount() {
+        this.unsubscribe?.();
+    }
+
+    render() {
+        const { user } = this.state;
+
+        return (
+            <BrowserRouter>
+                <Routes>
+
+                    {/* ── Guest routes ── */}
+                    <Route path="/"      element={<GuestRoute user={user}><Home /></GuestRoute>} />
+                    <Route path="/login" element={<GuestRoute user={user}><Login /></GuestRoute>} />
+
+                    {/* ── Protected /admin/* routes ── */}
+                    <Route
+                        path="/admin"
+                        element={<ProtectedRoute user={user}><Navigate to="/admin/dashboard" replace /></ProtectedRoute>}
+                    />
+                    <Route
+                        path="/admin/*"
+                        element={
+                            <ProtectedRoute user={user}>
+                                <Routes>
+                                    <Route path="dashboard" element={<AdminDashboard />} />
+                                    {/* <Route path="orders" element={<AdminOrders />} /> */}
+                                    <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+                                </Routes>
+                            </ProtectedRoute>
+                        }
+                    />
+
+                </Routes>
+            </BrowserRouter>
+        );
+    }
+}
+
+export default App;

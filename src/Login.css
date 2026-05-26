@@ -1,0 +1,102 @@
+﻿.login-page-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    max-width: 460px;
+}
+
+.login-parchment {
+    width: 100%;
+}
+
+/* ── Google button ── */
+.google-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #f4e8c1;
+    border: 1.5px solid #5a3e1b88;
+    border-radius: 2px;
+    padding: .5rem 1.25rem;
+    font-family: 'Cinzel', serif;
+    font-size: .7rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #3d2810;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    width: 100%;
+    justify-content: center;
+}
+
+.google-btn:hover {
+    border-color: #3d2810;
+    background: #ede0aa;
+}
+
+.google-btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.google-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* ── Or divider ── */
+.login-or-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 1.25rem 0;
+    color: #8b6914;
+    opacity: .6;
+}
+
+.login-or-divider::before,
+.login-or-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #8b691488, transparent);
+}
+
+.login-or-divider span {
+    font-family: 'Cinzel', serif;
+    font-size: .6rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+}
+
+/* ── Toggle ── */
+.login-toggle {
+    text-align: center;
+    font-family: 'Kalam', cursive;
+    font-size: .9rem;
+    color: #5a3e1b;
+    margin-top: 1.25rem;
+    margin-bottom: 0;
+    font-style: italic;
+}
+
+.login-toggle-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: 'Cinzel', serif;
+    font-size: .65rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #3d2810;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.login-toggle-btn:hover {
+    color: #1a0f05;
+}
