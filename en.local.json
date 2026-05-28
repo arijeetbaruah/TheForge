@@ -5,5 +5,6 @@
   "storageBucket": "forge-order-form.firebasestorage.app",
   "messagingSenderId": "367321711778",
   "appId": "1:367321711778:web:b1acd7e02c8c15a08b03fb",
-  "measurementId": "G-S56JMVNFZX"
+  "measurementId": "G-S56JMVNFZX",
+  "databaseURL": "https://forge-order-form-default-rtdb.asia-southeast1.firebasedatabase.app/"
 }

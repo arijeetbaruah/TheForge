@@ -22,6 +22,7 @@ const firebaseConfig = {
     storageBucket:     _.isEmpty(import.meta.env.FIREBASE_STORAGE_BUCKET) ? config.storageBucket : import.meta.env.FIREBASE_STORAGE_BUCKET,
     messagingSenderId: _.isEmpty(import.meta.env.FIREBASE_MESSAGING_SENDER_ID) ? config.messagingSenderId : import.meta.env.FIREBASE_MESSAGING_SENDER_ID,
     appId:             _.isEmpty(import.meta.env.FIREBASE_APP_ID) ? config.appId : import.meta.env.FIREBASE_APP_ID,
+    databaseURL:       _.isEmpty(import.meta.env.FIREBASE_DATABASE_URL) ? config.databaseURL : import.meta.env.FIREBASE_DATABASE_URL,
 };
 
 const app            = initializeApp(firebaseConfig);

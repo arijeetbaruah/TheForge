@@ -1,37 +1,78 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { onAuthStateChanged } from 'firebase/auth'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { auth } from './firebase/auth.js'
+import UserService from './Entity/UserService.js'
 
 import 'bootstrap/dist/css/bootstrap.css'
 
 import Home  from './Home/Home.jsx'
 import Login from './Login.jsx'
+// import Dashboard      from './Dashboard/Dashboard.jsx'
+// import AdminDashboard from './Admin/AdminDashboard.jsx'
 
-function ProtectedRoute({ user, children }) {
-    if (user === undefined) return null;
-    if (user === null)      return <Navigate to="/login" replace />;
-    return children;
-}
+// ── Route guards ──────────────────────────────────────────────────────────────
 
 function GuestRoute({ user, children }) {
     return children;
 }
 
-function AdminDashboard() {
-    return (<>Hi</>);
+function UserRoute({ user, children }) {
+    if (user === undefined) return null;
+    if (user === null)      return <Navigate to="/login" replace />;
+    return children;
 }
+
+function AdminRoute({ user, children }) {
+    if (user === undefined || user === null)      return <Navigate to="/login" replace />;
+    if (user.role !== 'admin') return <Navigate to="/dashboard" replace />;
+    return children;
+}
+
+// ── Logout ────────────────────────────────────────────────────────────────────
+
+class Logout extends React.Component {
+    componentDidMount() {
+        signOut(auth).catch((error) => console.error(error));
+    }
+
+    render() {
+        return <Navigate to="/" replace />;
+    }
+}
+
+// ── Placeholder pages (replace with real imports) ─────────────────────────────
+
+function AdminDashboard() { return <>Admin Dashboard</>; }
+function Dashboard()      { return <>Dashboard</>; }
+
+// ── App ───────────────────────────────────────────────────────────────────────
 
 class App extends React.Component {
 
     constructor(props) {
         super(props);
+        // undefined = loading, null = logged out, object = { uid, email, role }
         this.state = { user: undefined };
     }
 
-    componentDidMount() {
-        this.unsubscribe = onAuthStateChanged(auth, (u) => {
-            this.setState({ user: u ?? null });
+    async componentDidMount() {
+        this.unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            if (!firebaseUser) {
+                this.setState({ user: null });
+                return;
+            }
+
+            await UserService.initUser(firebaseUser.uid);
+            const record = await UserService.getUser(firebaseUser.uid);
+
+            this.setState({
+                user: {
+                    uid:   firebaseUser.uid,
+                    email: firebaseUser.email,
+                    role:  record?.role ?? 'user',
+                },
+            });
         });
     }
 
@@ -49,24 +90,34 @@ class App extends React.Component {
                     {/* ── Guest routes ── */}
                     <Route path="/"      element={<GuestRoute user={user}><Home /></GuestRoute>} />
                     <Route path="/login" element={<GuestRoute user={user}><Login /></GuestRoute>} />
+                    <Route path="/logout" element={<Logout />} />
 
-                    {/* ── Protected /admin/* routes ── */}
+                    {/* ── User routes ── */}
+                    <Route
+                        path="/dashboard"
+                        element={<UserRoute user={user}><Dashboard /></UserRoute>}
+                    />
+
+                    {/* ── Admin routes ── */}
                     <Route
                         path="/admin"
-                        element={<ProtectedRoute user={user}><Navigate to="/admin/dashboard" replace /></ProtectedRoute>}
+                        element={<AdminRoute user={user}><Navigate to="/admin/dashboard" replace /></AdminRoute>}
                     />
                     <Route
                         path="/admin/*"
                         element={
-                            <ProtectedRoute user={user}>
+                            <AdminRoute user={user}>
                                 <Routes>
                                     <Route path="dashboard" element={<AdminDashboard />} />
                                     {/* <Route path="orders" element={<AdminOrders />} /> */}
                                     <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
                                 </Routes>
-                            </ProtectedRoute>
+                            </AdminRoute>
                         }
                     />
+
+                    {/* ── Fallback ── */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
 
                 </Routes>
             </BrowserRouter>
