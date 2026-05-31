@@ -1,0 +1,87 @@
+@use 'variables' as *;
+
+// ── Parchment card ────────────────────────────────────────────────────────────
+@mixin parchment-card {
+    position: relative;
+    background: $parchment-bg;
+    border-radius: 2px;
+    box-shadow:
+        0 0 0 1px $parchment-border,
+        0 0 0 3px $parchment-gold,
+        0 4px 8px #00000055,
+        0 20px 60px #00000077,
+        inset 0 0 80px #c8a96622,
+        inset 0 0 20px #a0784433;
+
+    &::before {
+        content: ''; position: absolute; inset: 0; border-radius: 2px;
+        background:
+            radial-gradient(ellipse at 0% 0%,   #a07840aa 0%, transparent 25%),
+            radial-gradient(ellipse at 100% 0%,  #8b6432aa 0%, transparent 20%),
+            radial-gradient(ellipse at 0% 100%,  #8b6432aa 0%, transparent 20%),
+            radial-gradient(ellipse at 100% 100%,#a07840aa 0%, transparent 25%);
+        pointer-events: none;
+    }
+}
+
+// ── Ink label ─────────────────────────────────────────────────────────────────
+@mixin ink-label {
+    display: block;
+    font-family: $font-cinzel;
+    font-size: .65rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: $parchment-brown-dk;
+    margin-bottom: .4rem;
+}
+
+// ── Ink divider ───────────────────────────────────────────────────────────────
+@mixin ink-divider {
+    display: flex; align-items: center; gap: 12px;
+    color: $parchment-border; opacity: .6;
+
+    &::before, &::after {
+        content: ''; flex: 1; height: 1px;
+        background: linear-gradient(90deg, transparent, #{$parchment-border}88, transparent);
+    }
+}
+
+// ── Wax seal button ───────────────────────────────────────────────────────────
+@mixin wax-seal-btn {
+    display: inline-flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    width: 110px; height: 110px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, $parchment-seal, $parchment-seal-dk 60%, #4a0f0f);
+    border: none; cursor: pointer; color: #f5d4c0;
+    font-family: $font-cinzel; font-size: .55rem;
+    letter-spacing: .15em; text-transform: uppercase;
+    box-shadow: 0 4px 12px #00000077, 0 0 0 3px #8b1a1a, 0 0 0 5px #{$parchment-seal}44,
+                inset 0 2px 4px #ffffff22, inset 0 -2px 4px #00000044;
+    transition: all .2s; position: relative;
+
+    &::before {
+        content: ''; position: absolute; inset: 8px;
+        border-radius: 50%; border: 1px solid #ffffff22;
+    }
+
+    &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px #00000088, 0 0 0 3px #8b1a1a, 0 0 0 5px #{$parchment-seal}66,
+                    inset 0 2px 4px #ffffff22, inset 0 -2px 4px #00000044;
+    }
+    &:active { transform: scale(.97); }
+}
+
+// ── Admin card ────────────────────────────────────────────────────────────────
+@mixin admin-card {
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: $admin-card-shadow;
+    border: none;
+    margin-bottom: 1.5rem;
+}
+
+// ── Flex center ───────────────────────────────────────────────────────────────
+@mixin flex-center {
+    display: flex; align-items: center; justify-content: center;
+}

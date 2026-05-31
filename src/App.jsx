@@ -9,7 +9,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import Home  from './Home/Home.jsx'
 import Login from './Login.jsx'
 // import Dashboard      from './Dashboard/Dashboard.jsx'
-// import AdminDashboard from './Admin/AdminDashboard.jsx'
+import AdminDashboard from './Admin/AdminDashboard.jsx'
 
 // ── Route guards ──────────────────────────────────────────────────────────────
 
@@ -42,8 +42,6 @@ class Logout extends React.Component {
 }
 
 // ── Placeholder pages (replace with real imports) ─────────────────────────────
-
-function AdminDashboard() { return <>Admin Dashboard</>; }
 function Dashboard()      { return <>Dashboard</>; }
 
 // ── App ───────────────────────────────────────────────────────────────────────
@@ -83,6 +81,14 @@ class App extends React.Component {
     render() {
         const { user } = this.state;
 
+        if (user === undefined) return (
+            <div className="d-flex justify-content-center align-items-center vh-100">
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        );
+
         return (
             <BrowserRouter>
                 <Routes>
@@ -107,11 +113,7 @@ class App extends React.Component {
                         path="/admin/*"
                         element={
                             <AdminRoute user={user}>
-                                <Routes>
-                                    <Route path="dashboard" element={<AdminDashboard />} />
-                                    {/* <Route path="orders" element={<AdminOrders />} /> */}
-                                    <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
-                                </Routes>
+                                <AdminDashboard />
                             </AdminRoute>
                         }
                     />

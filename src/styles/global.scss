@@ -1,0 +1,26 @@
+@use 'variables' as *;
+
+// Google Fonts
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&family=Kalam:wght@300;400&display=swap');
+
+// ── Minimal resets (no * reset — let Bootstrap handle it) ────────────────────
+*, *::before, *::after { box-sizing: border-box; }
+
+// ── Public page body ─────────────────────────────────────────────────────────
+body.page-public {
+    min-height: 100vh;
+    background: $page-bg;
+    background-image:
+        radial-gradient(ellipse at 20% 50%, #2a1a0855 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, #1a100555 0%, transparent 50%);
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem 1rem;
+    font-family: $font-parchment;
+}
+
+// ── Admin page body ───────────────────────────────────────────────────────────
+body.page-admin {
+    background: $admin-content-bg;
+    font-family: $font-admin;
+    margin: 0;
+}

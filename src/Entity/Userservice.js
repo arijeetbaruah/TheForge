@@ -2,6 +2,8 @@
 import { getDb } from "../firebase/realtimeDB.js";
 import userRole from "./UserRole.js";
 
+import { generateUsername } from 'unique-username-generator'
+
 const UserService = {
     /**
      * Fetch a single user record by UID.
@@ -24,8 +26,16 @@ const UserService = {
         const db       = await getDb();
         const snapshot = await get(ref(db, `users/${uid}`));
         if (!snapshot.exists()) {
-            await set(ref(db, `users/${uid}`), { role: userRole.User });
+            const userName = generateUsername("-", 3, 20)
+            await set(ref(db, `users/${uid}`), { role: userRole.User, userName: userName });
         }
+    },
+
+    async getUsers() {
+        const db       = await getDb();
+        const snapshot = await get(ref(db, `users`));
+        if (!snapshot.exists()) return [];
+        return Object.entries(snapshot.val()).map(([uid, data]) => ({ uid, ...data }));
     },
 };
 
