@@ -16,13 +16,13 @@ if (import.meta.env.DEV) {
 // Replace these values with your Firebase project config
 // Firebase Console → Project Settings → Your apps → SDK setup
 const firebaseConfig = {
-    apiKey:            _.isEmpty(import.meta.env.FIREBASE_API_KEY) ? config.apiKey : import.meta.env.FIREBASE_API_KEY,
-    authDomain:        _.isEmpty(import.meta.env.FIREBASE_AUTH_DOMAIN) ? config.authDomain : import.meta.env.FIREBASE_AUTH_DOMAIN,
-    projectId:         _.isEmpty(import.meta.env.FIREBASE_PROJECT_ID) ? config.projectId : import.meta.env.FIREBASE_PROJECT_ID,
-    storageBucket:     _.isEmpty(import.meta.env.FIREBASE_STORAGE_BUCKET) ? config.storageBucket : import.meta.env.FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: _.isEmpty(import.meta.env.FIREBASE_MESSAGING_SENDER_ID) ? config.messagingSenderId : import.meta.env.FIREBASE_MESSAGING_SENDER_ID,
-    appId:             _.isEmpty(import.meta.env.FIREBASE_APP_ID) ? config.appId : import.meta.env.FIREBASE_APP_ID,
-    databaseURL:       _.isEmpty(import.meta.env.FIREBASE_DATABASE_URL) ? config.databaseURL : import.meta.env.FIREBASE_DATABASE_URL,
+    apiKey:            _.isEmpty(import.meta.env.VITE_FIREBASE_API_KEY) ? config.apiKey : import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain:        _.isEmpty(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN) ? config.authDomain : import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId:         _.isEmpty(import.meta.env.VITE_FIREBASE_PROJECT_ID) ? config.projectId : import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket:     _.isEmpty(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET) ? config.storageBucket : import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: _.isEmpty(import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID) ? config.messagingSenderId : import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId:             _.isEmpty(import.meta.env.VITE_FIREBASE_APP_ID) ? config.appId : import.meta.env.VITE_FIREBASE_APP_ID,
+    databaseURL:       _.isEmpty(import.meta.env.VITE_FIREBASE_DATABASE_URL) ? config.databaseURL : import.meta.env.VITE_FIREBASE_DATABASE_URL,
 };
 
 const app            = initializeApp(firebaseConfig);
