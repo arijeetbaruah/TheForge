@@ -11,6 +11,8 @@ if (import.meta.env.DEV) {
     }
 }
 
+console.log('Firebase config:', firebaseConfig);
+
 const get = (envKey, localKey) =>
     import.meta.env[envKey] || localConfig[localKey] || '';
 
