@@ -1,30 +1,29 @@
 ﻿import { initializeApp } from "firebase/app";
 
-import _ from "underscore"
-
-let config = {};
+let localConfig = {};
 
 if (import.meta.env.DEV) {
     try {
-        config = await import('../../en.local.json');
-        config = config.default;
+        const mod = await import('../../en.local.json');
+        localConfig = mod.default;
     } catch {
-        console.log('en.local.json not found');
+        console.log('en.local.json not found, using env vars');
     }
 }
 
-// Replace these values with your Firebase project config
-// Firebase Console → Project Settings → Your apps → SDK setup
+const get = (envKey, localKey) =>
+    import.meta.env[envKey] || localConfig[localKey] || '';
+
 const firebaseConfig = {
-    apiKey:            _.isEmpty(import.meta.env.VITE_FIREBASE_API_KEY) ? config.apiKey : import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain:        _.isEmpty(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN) ? config.authDomain : import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId:         _.isEmpty(import.meta.env.VITE_FIREBASE_PROJECT_ID) ? config.projectId : import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket:     _.isEmpty(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET) ? config.storageBucket : import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: _.isEmpty(import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID) ? config.messagingSenderId : import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId:             _.isEmpty(import.meta.env.VITE_FIREBASE_APP_ID) ? config.appId : import.meta.env.VITE_FIREBASE_APP_ID,
-    databaseURL:       _.isEmpty(import.meta.env.VITE_FIREBASE_DATABASE_URL) ? config.databaseURL : import.meta.env.VITE_FIREBASE_DATABASE_URL,
+    apiKey:            get('VITE_FIREBASE_API_KEY',            'apiKey'),
+    authDomain:        get('VITE_FIREBASE_AUTH_DOMAIN',        'authDomain'),
+    projectId:         get('VITE_FIREBASE_PROJECT_ID',         'projectId'),
+    storageBucket:     get('VITE_FIREBASE_STORAGE_BUCKET',     'storageBucket'),
+    messagingSenderId: get('VITE_FIREBASE_MESSAGING_SENDER_ID','messagingSenderId'),
+    appId:             get('VITE_FIREBASE_APP_ID',             'appId'),
+    databaseURL:       get('VITE_FIREBASE_DATABASE_URL',       'databaseURL'),
 };
 
-const app            = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
 export default app;
