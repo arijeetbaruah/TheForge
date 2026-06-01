@@ -6,7 +6,7 @@ import {
     signInWithPopup,
 } from 'firebase/auth'
 import { auth, googleProvider } from './firebase/auth.js'
-import UserService from './Entity/Userservice.js'
+import UserService from './Entity/UserService.js'
 
 import './Login.css'
 import Img from './Home/img.svg'
