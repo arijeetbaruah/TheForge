@@ -11,8 +11,6 @@ if (import.meta.env.DEV) {
     }
 }
 
-console.log('Firebase config:', firebaseConfig);
-
 const get = (envKey, localKey) =>
     import.meta.env[envKey] || localConfig[localKey] || '';
 
@@ -25,6 +23,8 @@ const firebaseConfig = {
     appId:             get('VITE_FIREBASE_APP_ID',             'appId'),
     databaseURL:       get('VITE_FIREBASE_DATABASE_URL',       'databaseURL'),
 };
+
+console.log('Firebase config:', firebaseConfig);
 
 const app = initializeApp(firebaseConfig);
 
