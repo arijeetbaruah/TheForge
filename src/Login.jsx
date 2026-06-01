@@ -6,9 +6,12 @@ import {
     signInWithPopup,
 } from 'firebase/auth'
 import { auth, googleProvider } from './firebase/auth.js'
+import UserService from './Entity/Userservice.js'
 
 import './Login.css'
 import Img from './Home/img.svg'
+import UserRole from "./Entity/UserRole.js";
+import {Navigate} from "react-router-dom";
 
 class Login extends React.Component {
 
@@ -21,10 +24,12 @@ class Login extends React.Component {
             password: '',
             error:    null,
             loading:  false,
+            user:     null
         };
 
         this.onSubmit      = this.onSubmit.bind(this);
         this.onGoogleLogin = this.onGoogleLogin.bind(this);
+        this.OnLoginSuccessfully = this.OnLoginSuccessfully.bind(this);
     }
 
     async onSubmit(e) {
@@ -34,13 +39,18 @@ class Login extends React.Component {
         const { email, password, mode } = this.state;
 
         try {
+            let uid = "";
             if (mode === 'login') {
-                await signInWithEmailAndPassword(auth, email, password);
+                const cred = await signInWithEmailAndPassword(auth, email, password);
+                uid = cred.user.uid;
             } else {
-                await createUserWithEmailAndPassword(auth, email, password);
+                const cred =await createUserWithEmailAndPassword(auth, email, password);
+                uid = cred.user.uid;
             }
             // onAuthSuccess is called by the parent via onAuthStateChanged —
             // no explicit call needed here; Firebase will update auth state.
+
+            await this.OnLoginSuccessfully(uid);
         } catch (err) {
             this.setState({ error: this.friendlyError(err.code), loading: false });
         }
@@ -49,10 +59,27 @@ class Login extends React.Component {
     async onGoogleLogin() {
         this.setState({ error: null, loading: true });
         try {
-            await signInWithPopup(auth, googleProvider);
+            const cred = await signInWithPopup(auth, googleProvider);
+
+            await this.OnLoginSuccessfully(cred.user.uid);
         } catch (err) {
             this.setState({ error: this.friendlyError(err.code), loading: false });
         }
+    }
+
+    async OnLoginSuccessfully(uid) {
+        let user = await UserService.getUser(uid);
+
+        // First login
+        if (user == null) {
+            await UserService.initUser(uid);
+            user = await UserService.getUser(uid);
+        }
+
+        this.setState({
+            loading: false,
+            user
+        });
     }
 
     friendlyError(code) {
@@ -77,8 +104,17 @@ class Login extends React.Component {
     }
 
     render() {
-        const { mode, email, password, error, loading } = this.state;
+        const { mode, email, password, error, loading, user } = this.state;
         const isLogin = mode === 'login';
+
+        if (user != null)
+        {
+            if (user.role !== UserRole.ADMIN)
+            {
+                return (<><Navigate to={"/admin/dashboard"}/></>);
+            }
+            return (<><Navigate to={"/dashboard"}/></>);
+        }
 
         return (
             <Container className="login-page-wrap">

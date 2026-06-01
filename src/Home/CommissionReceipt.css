@@ -1,15 +1,5 @@
 ﻿@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&family=Kalam:wght@300;400&display=swap');
 
-body {
-    min-height: 100vh;
-    background: #1a1208;
-    background-image:
-            radial-gradient(ellipse at 20% 50%, #2a1a0855 0%, transparent 60%),
-            radial-gradient(ellipse at 80% 20%, #1a100555 0%, transparent 50%);
-    display: flex; align-items: center; justify-content: center;
-    padding: 2rem 1rem;
-    font-family: 'IM Fell English', Georgia, serif;
-}
 
 .page-wrap { position: relative; width: 100%; max-width: 520px; }
 
