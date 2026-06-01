@@ -13,7 +13,7 @@ import AdminDashboard from './Admin/AdminDashboard.jsx'
 
 // ── Route guards ──────────────────────────────────────────────────────────────
 
-function GuestRoute({ user, children }) {
+function GuestRoute({ children }) {
     return children;
 }
 
