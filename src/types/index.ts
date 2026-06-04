@@ -19,6 +19,8 @@ export interface SheetEnchantment {
   Category: string;
   Name: string;
   Tier: string;
+  PriceAmount: number;
+  PriceUnit: string;
 }
 
 export interface SheetDataResponse {

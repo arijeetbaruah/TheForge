@@ -5,6 +5,78 @@ import { auth } from "../lib/firebase";
 import type { SheetItem, SheetEnchantment } from "../types";
 import { Scroll, Swords, ShieldAlert, Check } from "lucide-react";
 
+class Currency {
+  PriceAmount: number;
+  PriceUnit: string;
+
+  constructor(priceAmount: number, priceUnit: string) {
+    this.PriceAmount = priceAmount;
+    this.PriceUnit = priceUnit;
+
+    this.convertAllToGP();
+  }
+
+  convertAllToGP(){
+    switch(this.PriceUnit){
+      case "pp":
+        this.PriceAmount *= 10;
+        break;
+      case "ep":
+        this.PriceAmount /= 2;
+        break;
+      case "sp":
+        this.PriceAmount /= 10;
+        break;
+      case "cp":
+        this.PriceAmount /= 100;
+        break;
+    }
+
+    this.PriceUnit = "gp";
+  }
+
+  Add(amount: Currency): Currency{
+    const newVal = this.PriceAmount + amount.PriceAmount;
+    return new Currency(newVal, "gp");
+  }
+
+  multiply(amount: number):Currency {
+    return new Currency(this.PriceAmount * amount, this.PriceUnit);
+  }
+
+  toString(): string{
+    // 1. Convert everything to total copper first
+    const cpRates: Record<string, number> = {
+      "pp": 1000,
+      "gp": 100,
+      "ep": 50,
+      "sp": 10,
+      "cp": 1
+    };
+
+    let totalCopper = Math.round(this.PriceAmount * cpRates[this.PriceUnit]);
+
+    // 2. Extract whole Gold Pieces (1 gp = 100 cp)
+    const gp = Math.floor(totalCopper / 100);
+    totalCopper %= 100; // Remainder is 50 cp
+
+    // 3. Extract whole Silver Pieces (1 sp = 10 cp)
+    const sp = Math.floor(totalCopper / 10); // 50 / 10 = 5 sp
+    totalCopper %= 10; // Remainder is 0 cp
+
+    // 4. Whatever is left is Copper
+    const cp = totalCopper;
+
+    // 5. Format output dynamically based on what has value
+    const result: string[] = [];
+    if (gp > 0) result.push(`${gp} gp`);
+    if (sp > 0) result.push(`${sp} sp`);
+    if (cp > 0) result.push(`${cp} cp`);
+
+    return result.length > 0 ? result.join(", ") : "0 gp";
+  }
+}
+
 const OrderForm: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -43,7 +115,7 @@ const OrderForm: React.FC = () => {
       setLoadingData(true);
       setFetchError(null);
       try {
-        const res = await fetch("/api/sheet-data");
+        const res = await fetch("https://the-forge-mu-seven.vercel.app/api/sheet-data");
         if (!res.ok) {
           throw new Error("The scroll of materials could not be fetched.");
         }
@@ -88,9 +160,14 @@ const OrderForm: React.FC = () => {
   const selectedEnchantment = filteredEnchantments.find((e) => e.Name === enchantmentName);
 
   // Calculate price
-  const basePrice = selectedItem ? selectedItem.PriceAmount : 0;
-  const priceUnit = selectedItem ? selectedItem.PriceUnit : "gp";
-  const totalPrice = providingBase ? 0 : basePrice * quantity;
+
+  const basePrice:Currency = new Currency(selectedItem ? selectedItem.PriceAmount : 0, selectedItem ? selectedItem.PriceUnit : "gp")
+  const enchantmentPrice:Currency = new Currency(selectedEnchantment ? selectedEnchantment.PriceAmount : 0, selectedEnchantment ? selectedEnchantment.PriceUnit : "gp")
+
+  const totalPrice:Currency =
+      (providingBase ? new Currency(0, "gp") : basePrice)
+          .Add(enchantmentPrice)
+          .multiply(quantity);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -382,7 +459,7 @@ const OrderForm: React.FC = () => {
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <span className="font-medieval h5 mb-0">Base Item Unit Cost:</span>
                 <span className="font-monospace fw-bold">
-                  {providingBase ? "0" : basePrice} {priceUnit}
+                  {providingBase ? "0 gp" : basePrice.toString()}
                 </span>
               </div>
             </div>
@@ -392,7 +469,7 @@ const OrderForm: React.FC = () => {
                 <div className="d-flex justify-content-between align-items-center">
                   <span className="font-medieval h4 mb-0 text-primary">Total Est. Cost</span>
                   <span className="font-medieval h3 mb-0 text-danger fw-bold">
-                    {totalPrice} {priceUnit}
+                    {totalPrice.toString()}
                   </span>
                 </div>
               </div>
