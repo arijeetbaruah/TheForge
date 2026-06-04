@@ -462,6 +462,12 @@ const OrderForm: React.FC = () => {
                   {providingBase ? "0 gp" : basePrice.toString()}
                 </span>
               </div>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <span className="font-medieval h5 mb-0">Enchantment Cost:</span>
+                <span className="font-monospace fw-bold">
+                  {enchantmentPrice.toString()}
+                </span>
+              </div>
             </div>
 
             <div>
