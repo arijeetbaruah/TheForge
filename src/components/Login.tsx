@@ -55,19 +55,26 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleGoogleAuth = async () => {
+  const handleGoogleAuth = () => {
     setError(null);
     setAuthLoading(true);
-    try {
-      await signInWithPopup(auth, googleProvider);
-      await refreshUser();
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Google sign-in collapsed like a poorly built shield.");
-    } finally {
-      setAuthLoading(false);
-      console.log("Complete")
-    }
+    signInWithPopup(auth, googleProvider)
+        .then(() => {
+          refreshUser()
+              .then()
+              .catch(err => {
+                console.error(err);
+                setError(err.message || "Google sign-in collapsed like a poorly built shield.");
+              });
+        })
+        .catch(err => {
+          console.error(err);
+          setError(err.message || "Google sign-in collapsed like a poorly built shield.");
+        })
+        .finally(() => {
+          setAuthLoading(false);
+          console.log("Complete");
+        });
   };
 
   if (loading || user) {
