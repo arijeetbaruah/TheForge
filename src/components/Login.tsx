@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithRedirect, getRedirectResult  } from "firebase/auth";
 import { auth, googleProvider } from "../lib/firebase";
 import { useAuth } from "../context/AuthContext";
 import { Shield, Sparkles } from "lucide-react";
@@ -16,15 +16,25 @@ const Login: React.FC = () => {
   const [authLoading, setAuthLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!loading && user) {
-      if (user.role === "admin") {
-        navigate("/admin");
-      } else if (user.role === "member") {
-        navigate("/forge");
-      } else {
-        navigate("/");
-      }
-    }
+    getRedirectResult(auth)
+        .then(async (result) => {
+          if (result?.user) {
+            await refreshUser();
+            
+            if (!loading && user) {
+              if (user.role === "admin") {
+                navigate("/admin");
+              } else if (user.role === "member") {
+                navigate("/forge");
+              } else {
+                navigate("/");
+              }
+            }
+          }
+        })
+        .catch((err) => {
+          setError(err.message || "Google sign-in failed.");
+        });
   }, [user, loading, navigate]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -55,26 +65,15 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleGoogleAuth = () => {
+  const handleGoogleAuth = async () => {
     setError(null);
     setAuthLoading(true);
-    signInWithPopup(auth, googleProvider)
-        .then(() => {
-          refreshUser()
-              .then()
-              .catch(err => {
-                console.error(err);
-                setError(err.message || "Google sign-in collapsed like a poorly built shield.");
-              });
-        })
-        .catch(err => {
-          console.error(err);
-          setError(err.message || "Google sign-in collapsed like a poorly built shield.");
-        })
-        .finally(() => {
-          setAuthLoading(false);
-          console.log("Complete");
-        });
+    try {
+      await signInWithRedirect(auth, googleProvider);
+    } catch (err: any) {
+      setError(err.message || "Google sign-in failed.");
+      setAuthLoading(false);
+    }
   };
 
   if (loading || user) {
