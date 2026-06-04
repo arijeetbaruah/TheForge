@@ -1,39 +1,31 @@
-// ── Parchment palette (public pages) ─────────────────────────────────────────
-$parchment-bg:        #f4e8c1;
-$parchment-bg-alt:    #f0e2b0;
-$parchment-border:    #8b6914;
-$parchment-gold:      #c9a227;
-$parchment-ink:       #1a0f05;
-$parchment-brown:     #5a3e1b;
-$parchment-brown-dk:  #3d2810;
-$parchment-brown-lt:  #8b6440;
-$parchment-seal:      #c0392b;
-$parchment-seal-dk:   #7b1818;
+// Bootstrap Variable Overrides
 
-$page-bg:             #1a1208;
+// Medieval & Parchment Theme Colors
+$body-bg:       #f5e9c8;   // aged parchment cream
+$body-color:    #2b1d0e;   // dark ink
+$primary:       #8b4513;   // saddle brown
+$secondary:     #5c3a1e;   // dark brown
+$success:       #2d5a27;   // forest green
+$info:          #1f4e5b;   // deep sea blue
+$warning:       #8b5a00;   // dark amber
+$danger:        #8b1c1c;   // blood red / wax red
+$dark:          #1a1108;   // deep dark ink
 
-// ── Admin palette ─────────────────────────────────────────────────────────────
-$admin-sidebar-bg:    #343a40;
-$admin-sidebar-width: 250px;
-$admin-navbar-h:      57px;
-$admin-brand-bg:      #212529;
-$admin-sidebar-text:  #c2c7d0;
-$admin-sidebar-hover: rgba(255,255,255,0.08);
-$admin-sidebar-active:#007bff;
-$admin-content-bg:    #f4f6f9;
-$admin-card-shadow:   0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+// Custom Theme Colors (non-Bootstrap standard)
+$parchment-light: #fbf7eb;
+$parchment-dark:  #e6d3a8;
+$gold-accent:     #c59b27;
+$wax-red:         #8b1c1c;
+$wax-red-hover:   #a82323;
 
-// ── Status colours ────────────────────────────────────────────────────────────
-$status-pending-bg:   #fff3cd;
-$status-pending-fg:   #856404;
-$status-assigned-bg:  #cfe2ff;
-$status-assigned-fg:  #084298;
-$status-complete-bg:  #d1e7dd;
-$status-complete-fg:  #0a3622;
+// Sharp edges for a hand-crafted, forged feel
+$border-radius:       0.125rem;
+$border-radius-sm:    0.0625rem;
+$border-radius-lg:    0.25rem;
 
-// ── Typography ────────────────────────────────────────────────────────────────
-$font-parchment:      'IM Fell English', Georgia, serif;
-$font-title:          'UnifrakturMaguntia', cursive;
-$font-cinzel:         'Cinzel', serif;
-$font-kalam:          'Kalam', cursive;
-$font-admin:          'Inter', system-ui, sans-serif;
+// Border color
+$border-color:        #5c3a1e;
+
+// Typography
+$font-family-base: 'IM Fell English', Georgia, serif;
+$headings-font-family: 'Cinzel', serif;

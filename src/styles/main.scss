@@ -1,0 +1,11 @@
+// Entry point for styles
+
+// 1. Override Bootstrap variables first
+@import "variables";
+
+// 2. Import Bootstrap
+@import "bootstrap/scss/bootstrap";
+
+// 3. Project-specific partials
+@import "parchment";
+@import "typography";

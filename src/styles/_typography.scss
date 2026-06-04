@@ -1,0 +1,54 @@
+// Typography Rules for The Forge
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  color: #2b1d0e; // ink color
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+h1 {
+  font-size: 2.5rem;
+  text-shadow: 1px 1px 3px rgba(92, 58, 30, 0.2);
+}
+
+h2 {
+  font-size: 2rem;
+  border-bottom: 1px double rgba(92, 58, 30, 0.25);
+  padding-bottom: 0.5rem;
+}
+
+h3 {
+  font-size: 1.6rem;
+}
+
+p {
+  font-family: 'IM Fell English', Georgia, serif;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+
+.font-medieval {
+  font-family: 'MedievalSharp', cursive, serif;
+}
+
+.text-ink {
+  color: #2b1d0e;
+}
+
+.text-gold {
+  color: #c59b27;
+}
+
+.drop-cap::first-letter {
+  font-family: 'MedievalSharp', cursive, serif;
+  float: left;
+  font-size: 3.5rem;
+  line-height: 0.8;
+  margin-top: 0.15em;
+  margin-right: 0.1em;
+  color: #8b1c1c;
+  font-weight: bold;
+}
