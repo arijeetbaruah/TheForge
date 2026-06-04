@@ -1,4 +1,5 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
+import _ from 'underscore'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {
@@ -32,12 +33,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
+  const tierCost:Record<string, { PriceAmount: number; PriceUnit: string }> = {
+    "1": { PriceAmount: 200, PriceUnit: "gp" },
+    "2": { PriceAmount: 400, PriceUnit: "gp" },
+    "3": { PriceAmount: 600, PriceUnit: "gp" },
+  }
+
   try {
     const response = await fetch(appsScriptUrl);
     if (!response.ok) {
       throw new Error(`Google Apps Script responded with code: ${response.status}`);
     }
     const data = await response.json();
+    data.enchantments = _.map(data.enchantments, enchantment => {
+      const cost = tierCost[enchantment.Tier];
+      enchantment.PriceAmount = cost.PriceAmount;
+      enchantment.PriceUnit = cost.PriceUnit;
+
+      return enchantment;
+    });
     return res.status(200).json(data);
   } catch (error: any) {
     console.error("Error calling Apps Script GET:", error);
