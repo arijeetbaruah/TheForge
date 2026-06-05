@@ -15,46 +15,38 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(false);
 
+  // Handle Google redirect result — just catch errors, let onAuthStateChanged do the rest
   useEffect(() => {
-    getRedirectResult(auth)
-        .catch((err) => {
-          setError(err.message || "Google sign-in failed.");
-        });
-  }, []); // ← empty deps, run once on mount only
+    getRedirectResult(auth).catch((err) => {
+      setError(err.message || "Google sign-in failed.");
+    });
+  }, []);
 
+  // Navigate once AuthContext has resolved the user
   useEffect(() => {
-    getRedirectResult(auth)
-        .then(async (result) => {
-          if (result?.user) {
-            if (!loading && user) {
-              if (user.role === "admin") {
-                navigate("/admin");
-              } else if (user.role === "member") {
-                navigate("/forge");
-              } else {
-                navigate("/");
-              }
-            }
-          }
-        })
-        .catch((err) => {
-          setError(err.message || "Google sign-in failed.");
-        });
+    if (!loading && user) {
+      if (user.role === "admin") {
+        navigate("/admin");
+      } else if (user.role === "member") {
+        navigate("/forge");
+      } else {
+        navigate("/");
+      }
+    }
   }, [user, loading, navigate]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setAuthLoading(true);
-
     try {
       if (isRegister) {
         await createUserWithEmailAndPassword(auth, email, password);
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
+      // No refreshUser needed — onAuthStateChanged handles it
     } catch (err: any) {
-      console.error(err);
       if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
         setError("Invalid credentials. Verify your scrolls and try again.");
       } else if (err.code === "auth/email-already-in-use") {
@@ -82,14 +74,14 @@ const Login: React.FC = () => {
 
   if (loading || user) {
     return (
-      <div className="parchment-container d-flex justify-content-center align-items-center">
-        <div className="parchment-scroll text-center" style={{ maxWidth: "400px" }}>
-          <h2 className="mb-3">Entering The Tavern</h2>
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
+        <div className="parchment-container d-flex justify-content-center align-items-center">
+          <div className="parchment-scroll text-center" style={{ maxWidth: "400px" }}>
+            <h2 className="mb-3">Entering The Tavern</h2>
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
           </div>
         </div>
-      </div>
     );
   }
 
