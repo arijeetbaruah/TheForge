@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
+import {getRedirectResult, onAuthStateChanged, signOut as firebaseSignOut} from "firebase/auth";
 import { auth } from "../lib/firebase";
 import type { AppUser, UserRole } from "../types";
 
@@ -43,6 +43,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setError("Failed to sync user claims.");
     }
   };
+
+  useEffect(() => {
+    // Process any pending Google redirect FIRST, before onAuthStateChanged
+    getRedirectResult(auth)
+        .then((result) => {
+          if (result) {
+            console.log("[Auth] Redirect result processed:", result.user.uid);
+          }
+        })
+        .catch((err) => {
+          console.error("[Auth] Redirect result error:", err);
+          setError(err.message || "Google sign-in failed.");
+        });
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
