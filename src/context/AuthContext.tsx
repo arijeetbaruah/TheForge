@@ -68,13 +68,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             });
 
             if (!res.ok) {
-              throw new Error("Failed to provision user on server.");
+              console.error("Provision failed with status:", res.status, "— defaulting to 'user' role");
+              role = "user" as UserRole;
+              discordId = "";
+            }else{
+              // Force refresh token to pull new claims from Firebase Auth
+              tokenResult = await firebaseUser.getIdTokenResult(true);
+              role = (tokenResult.claims.role as UserRole) || "user";
+              discordId = (tokenResult.claims.discordId as string) || "";
             }
-
-            // Force refresh token to pull new claims from Firebase Auth
-            tokenResult = await firebaseUser.getIdTokenResult(true);
-            role = (tokenResult.claims.role as UserRole) || "user";
-            discordId = (tokenResult.claims.discordId as string) || "";
           }
 
           setUser({

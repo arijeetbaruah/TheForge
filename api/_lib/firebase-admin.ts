@@ -31,9 +31,15 @@ export async function verifyAuth(
   res: VercelResponse,
   allowedRoles?: string[]
 ): Promise<admin.auth.DecodedIdToken | null> {
+  if (!admin.apps.length) {
+    console.error("Firebase Admin SDK is not initialized. Check FIREBASE_ADMIN_SERVICE_ACCOUNT.");
+    res.status(500).json({ error: "Server auth configuration error." });
+    return null;
+  }
+
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    res.status(401).json({ error: "Missing or invalid authorization token. Forge entrance denied." });
+    res.status(401).json({ error: "Missing or invalid authorization token." });
     return null;
   }
 
