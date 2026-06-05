@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithRedirect, getRedirectResult, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, getRedirectResult, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../lib/firebase";
 import { useAuth } from "../context/AuthContext";
 import { Shield, Sparkles } from "lucide-react";
