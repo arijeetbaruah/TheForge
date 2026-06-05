@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, getRedirectResult, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, getRedirectResult, signInWithRedirect } from "firebase/auth";
 import { auth, googleProvider } from "../lib/firebase";
 import { useAuth } from "../context/AuthContext";
 import { Shield, Sparkles } from "lucide-react";
@@ -21,6 +21,14 @@ const Login: React.FC = () => {
       setError(err.message || "Google sign-in failed.");
     });
   }, []);
+
+  useEffect(() => {
+    getRedirectResult(auth).catch((err) => {
+      if (err.code !== "auth/cancelled-popup-request") {
+        setError(err.message || "Google sign-in failed.");
+      }
+    });
+  }, []); // single effect, no navigation logic here
 
   // Navigate once AuthContext has resolved the user
   useEffect(() => {
@@ -64,7 +72,7 @@ const Login: React.FC = () => {
   const handleGoogleAuth = async () => {
     setError(null);
     setAuthLoading(true);
-    await signInWithPopup(auth, googleProvider).catch((err: any) => {
+    await signInWithRedirect(auth, googleProvider).catch((err: any) => {
       setError(err.message || "Google sign-in failed.");
     })
     .finally(() => {
