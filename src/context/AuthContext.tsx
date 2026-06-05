@@ -46,19 +46,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      console.log("[Auth] onAuthStateChanged fired", firebaseUser?.uid ?? "no user");
       setLoading(true);
       setError(null);
+
       if (firebaseUser) {
         try {
-          // Check existing claims
-          let tokenResult = await firebaseUser.getIdTokenResult();
+          console.log("[Auth] Getting token...");
+          let tokenResult = await firebaseUser.getIdTokenResult(true);
           let role = tokenResult.claims.role as UserRole;
           let discordId = tokenResult.claims.discordId as string;
+          console.log("[Auth] Token claims:", { role, discordId });
 
-          // If no role is assigned, the user needs to be provisioned server-side
           if (!role) {
+            console.log("[Auth] No role — calling provision...");
             const token = await firebaseUser.getIdToken();
-
             const res = await fetch("/api/auth/provision", {
               method: "POST",
               headers: {
@@ -66,19 +68,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 Authorization: `Bearer ${token}`,
               },
             });
+            console.log("[Auth] Provision response status:", res.status);
+            const body = await res.json();
+            console.log("[Auth] Provision response body:", body);
 
             if (!res.ok) {
-              console.error("Provision failed with status:", res.status, "— defaulting to 'user' role");
+              console.error("[Auth] Provision failed — defaulting to 'user'");
               role = "user" as UserRole;
               discordId = "";
-            }else{
-              // Force refresh token to pull new claims from Firebase Auth
+            } else {
               tokenResult = await firebaseUser.getIdTokenResult(true);
               role = (tokenResult.claims.role as UserRole) || "user";
               discordId = (tokenResult.claims.discordId as string) || "";
+              console.log("[Auth] Claims after provision:", { role, discordId });
             }
           }
 
+          console.log("[Auth] Setting user with role:", role);
           setUser({
             uid: firebaseUser.uid,
             email: firebaseUser.email || "",
@@ -87,13 +93,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             role: role || "user",
           });
         } catch (err: any) {
-          console.error("Authentication error:", err);
+          console.error("[Auth] Caught error:", err);
           setError(err.message || "Failed to authenticate.");
           setUser(null);
         } finally {
           setLoading(false);
         }
       } else {
+        console.log("[Auth] No firebase user — clearing state");
         setUser(null);
         setLoading(false);
       }
