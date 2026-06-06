@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f4e4bc;
+  --foreground: #1a0f00;
+  --card: #f0d9a8;
+  --card-foreground: #3b2a1a;
+  --primary: #8b1a1a;
+  --primary-foreground: #f4e4bc;
+  --secondary: #e8d09a;
+  --secondary-foreground: #3b2a1a;
+  --muted: #dfc88e;
+  --muted-foreground: #7a5c3a;
+  --accent: #c9952a;
+  --accent-foreground: #1a0f00;
+  --destructive: #6b0f0f;
+  --border: #c4a96a;
+  --input: #e8d09a;
+  --ring: #c9952a;
+  --radius: 0.25rem;
+
+  --font-heading: 'Cinzel', serif;
+  --font-body: 'IM Fell English', serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-body);
+    /* Tactile warm parchment background texture */
+    background-image: 
+      radial-gradient(circle at 10% 20%, #f7ecd5 0%, transparent 40%),
+      radial-gradient(circle at 90% 80%, #ebdca7 0%, transparent 45%),
+      radial-gradient(circle at 50% 50%, #fcf7eb 0%, transparent 60%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+/* Scrollbars styled to match */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f4e4bc;
+  border-left: 1px solid #c4a96a;
+}
+::-webkit-scrollbar-thumb {
+  background: #c4a96a;
+  border: 2px solid #f4e4bc;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8b1a1a;
+}
+
+/* Beautiful drop cap for headings */
+.drop-cap::first-letter {
+  font-family: var(--font-heading);
+  font-size: 3rem;
+  float: left;
+  line-height: 0.8;
+  margin-top: 0.15em;
+  margin-right: 0.1em;
+  color: var(--primary);
+  text-shadow: 1px 1px 0px rgba(58,35,12,0.2);
+}
+
+/* Micro-animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 350ms ease-out forwards;
+}

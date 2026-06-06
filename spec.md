@@ -1,411 +1,424 @@
 # The Forge — Project Spec
+---
 
-## Overview
+## Project Overview
 
-A medieval-themed order submission platform where users can commission weapons, armor, poisons, and consumables. Built with React (Vite), Vercel serverless backend, Firebase Auth, and Google Sheets (via Apps Script) as the data store.
+**The Forge** is a commission/crafting request web app for a private Discord community. Members submit crafting requests, track order status, and admins manage the queue. Access is gated behind Discord OAuth — only authenticated community members can use the app.
 
 ---
 
 ## Tech Stack
 
-| Layer | Technology |
+| Layer | Choice |
 |---|---|
-| Frontend | React (Vite) + TypeScript, React Router |
-| Styling | Bootstrap 5, SCSS |
-| Backend | Vercel Serverless Functions (API routes, TypeScript) |
-| Auth | Firebase Authentication |
-| Data | Google Sheets + Apps Script |
-| Hosting | Vercel |
+| Frontend | React 18 + Vite + TypeScript |
+| Backend | Express.js + TypeScript + scss |
+| Auth | Discord OAuth 2.0 → Firebase Custom Auth |
+| Database | Firebase Realtime Database |
+| Styling | Tailwind CSS + shadcn/ui |
+| Forms | React Hook Form + Zod |
+| Server state | TanStack Query |
+| Client state | Zustand |
+| Routing | React Router v7 |
+| Deployment | Render (single service — Express serves built React app) |
 
 ---
 
-## Aesthetic
-
-**Theme: Medieval Parchment**
-
-- Background textures resembling aged parchment paper
-- Serif / blackletter typography (e.g. MedievalSharp, Cinzel, or IM Fell English)
-- Earth tones: aged cream (`#f5e9c8`), dark ink (`#2b1d0e`), burnt sienna accents
-- Decorative dividers, wax-seal style buttons, scroll-like UI panels
-- Subtle worn/distressed effects on cards and borders
-
----
-
-## Routes
-
-| Path | Component | Access |
-|---|---|---|
-| `/` | `OrderForm` | Public |
-| `/orders` | `OrderHistory` | `user`, `member`, `admin` |
-| `/forge` | `ForgeQueue` | `member`, `admin` |
-| `/admin` | `AdminDashboard` | `admin` only |
-| `/login` | `Login` | Public |
-
----
-
-## Firebase Auth
-
-- Two sign-in methods: **Email/password** and **Google OAuth** (via popup)
-- Both methods resolve to the same Firebase user — accounts with the same email are linked automatically
-- Auth state managed via React context (`AuthContext`)
-- Protected routes redirect to `/login` if unauthenticated
-- On first sign-in (either method), a user record is created server-side with role `user` and an empty `discordId`
-- Roles: `user`, `member`, `admin` — stored as Firebase custom claims, set by an admin via the Admin Dashboard
-- Role is checked server-side on every protected API route by decoding the ID token
-
-| Role | Description |
-|---|---|
-| `user` | Can submit orders and view their own order history. Discord ID autofills from their profile. |
-| `member` | Part of The Forge. Can browse all open orders and claim one to work on. |
-| `admin` | Full access — manage users/roles, view and action all orders. |
-
----
-
-## Pages & Components
-
-### `/` — Order Submission Form
-
-The core page. A parchment-styled scroll form with cascading dropdowns.
-
-**Fields:**
-
-1. **Category** — top-level selector, hardcoded client-side; drives filtering of items and enchantments
-   - Weapon
-   - Armor
-   - Poison
-   - Consumable
-
-2. **Base Item** — dropdown populated from `Mundane Items` tab, filtered by category. Each item carries `ItemName`, `PriceAmount`, and `PriceUnit`
-
-3. **Enchantment** — dropdown populated from `Enchantments` tab, filtered by category. Each enchantment carries `Name` and `Tier`
-
-4. **Character** — text input, the player's character name
-
-5. **Discord ID** — text input; autofills from the authenticated user's stored Discord ID, editable before submit
-
-6. **Providing Base Item** — checkbox; whether the user is supplying their own base item
-
-7. **Quantity** — number input (min 1, default 1)
-
-8. **Submit** — POSTs to `/api/orders`, which forwards to Apps Script `doPost` and appends a row to the `Orders` tab
-
-**POST body sent to Apps Script:**
-```json
-{
-  "taskId":       "generated-uuid",
-  "discordId":    "user#1234",
-  "character":    "Aldric the Bold",
-  "category":     "Weapon",
-  "baseItem":     "Sword",
-  "enchantment":  "Flaming Edge",
-  "providingBase": false,
-  "quantity":     "2"
-}
-```
-
----
-
-### `/orders` — Order History
-
-Accessible to all authenticated roles. Each user sees only their own orders.
-
-- Fetches from `/api/orders`, filtered server-side by the caller's Discord ID
-- Displays: category, base item, enchantment, quantity, status badge, submitted date
-- Status badges: `Pending` / `In Progress` / `Complete` / `Cancelled`
-- Orders sorted by `Submitted At` descending
-
----
-
-### `/forge` — Forge Queue
-
-Accessible to `member` and `admin` roles only.
-
-- Fetches all `Pending` orders from `/api/forge/orders`
-- Members can claim an order — sets `Assignee` to their name and status to `In Progress`
-- Members may only hold one active (`In Progress`) order at a time
-- Members can mark their claimed order as `Complete`
-- Admins can view and action all orders from this view
-
----
-
-### `/login` — Login Page
-
-Public. Redirects to `/` if already authenticated.
-
-- **"Sign in with Google"** button — triggers Firebase Google popup auth
-- **Email/password form** — email input + password input + submit
-- Toggle between the two methods on the same page
-- On successful sign-in, new users are provisioned server-side with role `user`
-
----
-
-### `/admin` — Admin Dashboard
-
-Restricted to `admin` role only.
-
-**Order management:**
-- View all orders, filterable by status, category, or Discord ID
-- Update any order's status
-- Reassign or unassign an order's `Assignee`
-
-**User management:**
-- View all registered users and their current roles
-- Promote `user` → `member`, demote `member` → `user`
-- Promote `member` → `admin`
-- Remove a user (revokes Firebase account and clears role)
-
----
-
-## Vercel Backend (API Routes)
-
-Serverless functions under `/api/`. All protected routes validate the Firebase ID token from `Authorization: Bearer <token>` and enforce role requirements server-side.
-
-| Endpoint | Method | Min Role | Description |
-|---|---|---|---|
-| `/api/sheet-data` | `GET` | Public | Proxy to Apps Script `doGet` — returns `{ items, enchantments }` |
-| `/api/auth/provision` | `POST` | Any auth | Called on first sign-in — creates user record, sets role `user` |
-| `/api/orders` | `POST` | Any auth | Submit new order → append row to Orders tab |
-| `/api/orders` | `GET` | Any auth | Fetch caller's own orders (filtered by Discord ID) |
-| `/api/forge/orders` | `GET` | `member` | Fetch all Pending orders |
-| `/api/forge/orders/:taskId` | `PATCH` | `member` | Claim order or update status |
-| `/api/admin/orders` | `GET` | `admin` | Fetch all orders unfiltered |
-| `/api/admin/orders/:taskId` | `PATCH` | `admin` | Update any order's status or assignee |
-| `/api/admin/users` | `GET` | `admin` | List all users with roles |
-| `/api/admin/users/:uid` | `PATCH` | `admin` | Update a user's role |
-| `/api/admin/users/:uid` | `DELETE` | `admin` | Remove a user |
-
-Auth is verified server-side using the Firebase Admin SDK.
-
----
-
----
-
-## Google Sheets — Data Store
-
-All app data lives in a single Google Spreadsheet. The Apps Script web app (`Code.gs`) is bound to the sheet and deployed as **Execute as: Me**, **Access: Anyone**. The Spreadsheet ID is stored in Script Properties as `SPREADSHEET_ID` (not hardcoded).
-
-### Sheet Tabs
-
-**`Mundane Items`** — source for base item dropdowns
-| Category | Item Name | Price Amount | Price Unit |
-|---|---|---|---|
-| Weapon | Sword | 15 | gp |
-| Armor | Chainmail | 75 | gp |
-
-**`Enchantments`** — source for enchantment dropdowns
-| Category | Name | Tier |
-|---|---|---|
-| Weapon | Flaming Edge | 2 |
-| Armor | Iron Will | 1 |
-
-**`Orders`** — append-only order log; header row is auto-written on first submission
-| Task ID | Discord ID | Character | Category | Base Item | Enchantment | Providing Base Item | Quantity | Assignee | Status | Submitted At |
-|---|---|---|---|---|---|---|---|---|---|---|
-| uuid | user#1234 | Aldric | Weapon | Sword | Flaming Edge | No | 2 | | Pending | 2026-06-04T10:00:00Z |
-
-### Apps Script (`Code.gs`)
-
-`doGet` — returns all items and enchantments in a single response:
-```json
-{
-  "items": [
-    { "Category": "Weapon", "ItemName": "Sword", "PriceAmount": 15, "PriceUnit": "gp" }
-  ],
-  "enchantments": [
-    { "Category": "Weapon", "Name": "Flaming Edge", "Tier": "2" }
-  ]
-}
-```
-
-`doPost` — appends a new row to `Orders`. Auto-writes header if sheet is empty. Returns `{ success, taskId }`.
-
-### Vercel API Proxy
-
-The React app never calls Apps Script directly. All requests go through Vercel functions to avoid CORS and keep `APPS_SCRIPT_URL` server-side only.
-
-| Vercel Route | Method | What it does |
-|---|---|---|
-| `/api/sheet-data` | `GET` | Fetches Apps Script `doGet`, returns `{ items, enchantments }` |
-| `/api/orders` | `POST` | Verifies Firebase auth token, generates `taskId`, forwards to Apps Script `doPost` |
-| `/api/orders` | `GET` | Reads Orders tab, filters rows by caller's Discord ID |
-| `/api/admin/orders` | `GET` | Returns all Orders rows (admin only) |
-| `/api/admin/orders/:taskId` | `PATCH` | Updates `Status` cell for a given Task ID (admin only) |
-
-> **Note:** Firebase is used for authentication only. The Google Sheet is the sole data store.
-
-### Frontend Data Flow
-
-- On **page load**, one GET to `/api/sheet-data` fetches all items and enchantments at once
-- Client-side filtering by `Category` drives the Base Item and Enchantment dropdowns
-- Dropdowns show `Fetching from the forge...` while the request is in flight
-- Errors fall back to empty lists with an inline warning
-
-
-
-
----
-
-## TypeScript Conventions
-
-- Strict mode enabled (`"strict": true` in `tsconfig.json`)
-- All API route handlers typed with `VercelRequest` / `VercelResponse`
-- Shared types in `src/types/` — key interfaces:
-
-```ts
-// src/types/index.ts
-
-export type UserRole = "user" | "member" | "admin";
-
-export interface AppUser {
-  uid: string;
-  email: string;
-  displayName: string;
-  discordId: string;
-  role: UserRole;
-}
-
-export interface SheetItem {
-  Category: string;
-  ItemName: string;
-  PriceAmount: number;
-  PriceUnit: string;
-}
-
-export interface SheetEnchantment {
-  Category: string;
-  Name: string;
-  Tier: string;
-}
-
-export interface SheetDataResponse {
-  items: SheetItem[];
-  enchantments: SheetEnchantment[];
-}
-
-export interface OrderPayload {
-  taskId: string;
-  discordId: string;
-  character: string;
-  category: string;
-  baseItem: string;
-  enchantment: string;
-  providingBase: boolean;
-  quantity: string;
-}
-
-export interface Order extends OrderPayload {
-  assignee: string;
-  status: "Pending" | "In Progress" | "Complete" | "Cancelled";
-  submittedAt: string;
-}
-```
-
----
-
-## Styling — Bootstrap 5 + SCSS
-
-Bootstrap is imported via SCSS so variables can be overridden before compilation. No jQuery; Bootstrap JS components use the native ESM bundle (`bootstrap/dist/js/bootstrap.esm`).
-
-### File Structure
-
-```
-src/
-└── styles/
-    ├── _variables.scss   # Bootstrap variable overrides (colors, fonts, spacing)
-    ├── _parchment.scss   # Custom parchment texture, worn edges, scroll panels
-    ├── _typography.scss  # Blackletter / serif font setup
-    └── main.scss         # Entry point — imports variables, then Bootstrap, then partials
-```
-
-### `main.scss` pattern
-
-```scss
-// 1. Override Bootstrap variables first
-@import "variables";
-
-// 2. Import Bootstrap
-@import "bootstrap/scss/bootstrap";
-
-// 3. Project-specific partials
-@import "parchment";
-@import "typography";
-```
-
-### Key variable overrides (`_variables.scss`)
-
-```scss
-// Colors
-$body-bg:       #f5e9c8;   // aged parchment
-$body-color:    #2b1d0e;   // dark ink
-$primary:       #8b4513;   // saddle brown
-$secondary:     #5c3a1e;
-$border-radius: 0.125rem;  // sharp edges for a hand-crafted feel
-
-// Typography
-$font-family-base: 'IM Fell English', Georgia, serif;
-$headings-font-family: 'Cinzel', serif;
-```
-
----
+## Repository Structure
 
 ```
 the-forge/
-├── api/                            # Vercel serverless functions (TypeScript)
-│   ├── sheet-data.ts
-│   ├── orders.ts
-│   ├── forge/
-│   │   └── orders.ts
-│   └── admin/
-│       ├── orders.ts
-│       └── users.ts
-├── src/
-│   ├── components/
-│   │   ├── OrderForm.tsx
-│   │   ├── OrderHistory.tsx
-│   │   ├── ForgeQueue.tsx
-│   │   ├── AdminDashboard.tsx
-│   │   ├── Login.tsx
-│   │   ├── ProtectedRoute.tsx        # accepts requiredRole prop
-│   │   └── ui/                       # Parchment-themed Bootstrap component wrappers
-│   ├── context/
-│   │   └── AuthContext.tsx
-│   ├── lib/
-│   │   ├── firebase.ts
-│   │   └── sheetData.ts
-│   ├── styles/
-│   │   ├── _variables.scss
-│   │   ├── _parchment.scss
-│   │   ├── _typography.scss
-│   │   └── main.scss
-│   ├── types/
-│   │   └── index.ts
-│   ├── App.tsx
-│   └── main.tsx
-├── tsconfig.json
-├── tsconfig.node.json
-├── vite.config.ts
-├── .env.local
-└── vercel.json
+  .env                        ← local secrets (never committed)
+  .env.example                ← committed template
+  .gitignore
+  package.json                ← root scripts with concurrently
+  client/
+    src/
+      lib/
+        firebase.ts           ← Firebase client SDK init
+        api.ts                ← axios instance pointed at /api
+        queryClient.ts        ← TanStack Query client
+      store/
+        authStore.ts          ← Zustand auth store
+      pages/
+        public/
+          Landing.tsx         ← login/splash page
+          RequestForm.tsx     ← submit a commission request
+          MyOrders.tsx        ← user's own order history
+        admin/
+          Dashboard.tsx       ← order queue overview
+          OrderDetail.tsx     ← single order management
+          Members.tsx         ← manage user roles
+      components/
+        ui/                   ← shadcn/ui primitives
+        forge/
+          Navbar.tsx
+          OrderCard.tsx
+          StatusBadge.tsx
+          ProtectedRoute.tsx  ← redirects if not authed
+          AdminRoute.tsx      ← redirects if not ADMIN role
+      pages/
+        auth/
+          Callback.tsx        ← handles /auth/callback#token=
+      hooks/
+        useAuth.ts
+        useOrders.ts
+      types/
+        order.ts
+        user.ts
+      App.tsx
+      main.tsx
+    vite.config.ts
+    tailwind.config.ts
+    package.json
+  server/
+    src/
+      lib/
+        firebase-admin.ts     ← Admin SDK init
+      routes/
+        index.ts
+        auth.ts               ← Discord OAuth + custom token mint
+        orders.ts             ← CRUD for commission orders
+        users.ts              ← role management
+      middleware/
+        requireAuth.ts        ← verify Firebase ID token
+        requireAdmin.ts       ← verify ADMIN role
+      index.ts                ← Express entry point
+    tsconfig.json
+    package.json
 ```
 
 ---
 
 ## Environment Variables
 
+### `.env` (root, local dev)
+
+```bash
+NODE_ENV=development
+PORT=3000
+CLIENT_URL=http://localhost:5173
+
+# Discord OAuth
+DISCORD_CLIENT_ID=
+DISCORD_CLIENT_SECRET=
+DISCORD_REDIRECT_URI=http://localhost:3000/api/auth/discord/callback
+
+# Firebase Client SDK — MUST be prefixed VITE_ so Vite bakes them in at build time
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_DATABASE_URL=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+
+# Firebase Admin SDK — no VITE_ prefix, server only, never exposed to browser
+FIREBASE_PROJECT_ID=
+FIREBASE_CLIENT_EMAIL=
+FIREBASE_PRIVATE_KEY=
 ```
-VITE_FIREBASE_API_KEY
-VITE_FIREBASE_AUTH_DOMAIN
-VITE_FIREBASE_PROJECT_ID
-VITE_FIREBASE_APP_ID
-FIREBASE_ADMIN_SERVICE_ACCOUNT   # Server-side only (JSON string)
-APPS_SCRIPT_URL                  # Google Apps Script exec URL, server-side only
+
+### Render Production
+
+Set every variable above in the Render dashboard. Additionally:
+- `NODE_ENV=production`
+- `CLIENT_URL=https://your-app.onrender.com`
+- `DISCORD_REDIRECT_URI=https://your-app.onrender.com/api/auth/discord/callback`
+
+`PORT` is set automatically by Render — do not override it.
+
+---
+
+## Auth Flow
+
+```
+1. User visits / → not authed → redirect to /login
+2. User clicks "Login with Discord"
+   → window.location.href = '/api/auth/discord'
+3. Express redirects to Discord OAuth consent screen
+4. Discord redirects to /api/auth/discord/callback?code=...
+5. Express exchanges code → gets Discord user info
+6. Express mints Firebase Custom Token (uid = "discord:{discordId}")
+7. Express writes/updates user record in Realtime DB with role
+8. Express redirects to {CLIENT_URL}/auth/callback#token={customToken}
+9. React /auth/callback page reads token from hash, clears URL
+10. signInWithCustomToken(auth, token) → Firebase session established
+11. Zustand authStore listens to onAuthStateChanged → stores user
+12. Redirect to /
+```
+
+### Role Hierarchy
+
+```
+USER    → can only view their own orders, cannot submit (must be promoted)
+MEMBER  → can submit commission requests, view own orders
+ADMIN   → full access: manage all orders, promote/demote users
+```
+
+New users always start as `USER`. Admins promote them via the Members panel.
+
+---
+
+## Data Models
+
+### User (`/users/{uid}`)
+
+```ts
+interface ForgeUser {
+  uid: string;              // "discord:{discordId}"
+  discordId: string;
+  username: string;
+  email: string | null;
+  avatar: string | null;    // full CDN URL
+  role: 'USER' | 'MEMBER' | 'ADMIN';
+  createdAt: number;        // timestamp
+  updatedAt: number;
+}
+```
+
+### Order (`/orders/{orderId}`)
+
+```ts
+type OrderStatus =
+  | 'PENDING'       // submitted, awaiting admin review
+  | 'ACCEPTED'      // admin accepted, work not started
+  | 'IN_PROGRESS'   // being crafted
+  | 'READY'         // ready for delivery
+  | 'COMPLETED'     // delivered and closed
+  | 'REJECTED';     // declined with reason
+
+type Category =
+  | 'WEAPON'
+  | 'ARMOUR'
+  | 'POTION'
+  | 'SCROLL'
+  | 'JEWELLERY'
+  | 'OTHER';
+
+interface Order {
+  id: string;
+  userId: string;
+  discordUsername: string;
+  category: Category;
+  itemName: string;
+  description: string;
+  quantity: number;
+  specialRequests: string | null;
+  status: OrderStatus;
+  adminNote: string | null;     // shown to user (e.g. rejection reason)
+  internalNote: string | null;  // admin-only note
+  createdAt: number;
+  updatedAt: number;
+}
 ```
 
 ---
 
-## Out of Scope (v1)
+## API Routes
 
-- Payment processing
-- Email/notification on order submission
-- File uploads (e.g. reference images)
-- Multi-language support
+All `/api/*` routes are handled by Express. Routes marked 🔒 require a valid Firebase ID token in `Authorization: Bearer <idToken>`. Routes marked 👑 additionally require `role === 'ADMIN'`.
+
+```
+GET    /api/health                    → health check
+
+GET    /api/auth/discord              → redirect to Discord OAuth
+GET    /api/auth/discord/callback     → OAuth callback, mint token, redirect to client
+
+GET    /api/orders                  🔒 → MEMBER: own orders. ADMIN: all orders
+POST   /api/orders                  🔒 → MEMBER+ creates order
+GET    /api/orders/:id              🔒 → owner or ADMIN
+PATCH  /api/orders/:id              👑 → update status, notes
+DELETE /api/orders/:id              👑 → hard delete
+
+GET    /api/users                   👑 → list all users
+PATCH  /api/users/:uid/role         👑 → promote/demote role
+```
+
+### Auth Middleware
+
+`requireAuth.ts` — verifies `Authorization: Bearer <idToken>` using `admin.auth().verifyIdToken()`. Attaches decoded token to `req.user`.
+
+`requireAdmin.ts` — reads `req.user.uid`, checks `/users/{uid}/role === 'ADMIN'` in Realtime DB. Returns 403 if not.
+
+---
+
+## Frontend Pages
+
+### Public (requires MEMBER or ADMIN)
+
+**`/` — Landing / Home**
+- If not authed: show login page with "Login with Discord" button
+- If authed as USER (not yet promoted): show "Awaiting access" message
+- If authed as MEMBER/ADMIN: redirect to `/orders`
+
+**`/orders` — My Orders**
+- List of the user's own submitted orders
+- Status badge per order (colour-coded)
+- Link to order detail (read-only for members)
+
+**`/orders/new` — Submit Request**
+- Form: Category (select), Item Name, Description, Quantity, Special Requests
+- Validation via Zod + React Hook Form
+- POST to `/api/orders`
+
+**`/auth/callback` — Auth Callback**
+- Reads `#token=` from URL hash
+- Calls `signInWithCustomToken`
+- Redirects to `/`
+
+### Admin (`/admin/*`, requires ADMIN)
+
+**`/admin` — Dashboard**
+- Kanban or table view of all orders grouped by status
+- Filter by category, status
+- Click order → `/admin/orders/:id`
+
+**`/admin/orders/:id` — Order Detail**
+- Full order info
+- Status dropdown (change status)
+- Admin note field (visible to member)
+- Internal note field (admin only)
+- Save changes
+
+**`/admin/members` — Members Panel**
+- List all users with current role
+- Promote USER → MEMBER, demote MEMBER → USER
+- Cannot demote/edit other ADMINs
+
+---
+
+## UI Theme — Medieval Parchment
+
+The entire UI should feel like an illuminated manuscript or guild ledger from a fantasy medieval world. This is not a generic "dark fantasy" game UI — it should feel tactile, warm, and aged like real parchment.
+
+### Visual Language
+
+- **Background**: Warm aged parchment texture — `#f4e4bc` base with noise/grain overlay. Use a CSS `background-image` with SVG noise filter or a repeating subtle texture. Pages should feel like paper, not screens.
+- **Ink colours**: Deep sepia `#3b2a1a` for body text, near-black `#1a0f00` for headings, faded brown `#7a5c3a` for secondary text and borders.
+- **Accent**: Deep wax-seal red `#8b1a1a` for primary actions (submit, confirm). Aged gold `#c9952a` for highlights, active states, and decorative elements.
+- **Borders**: Hand-drawn style — use CSS `border` with slightly rough appearance, or SVG corner ornaments on cards and modals. Avoid sharp modern box shadows; prefer `box-shadow: 2px 3px 8px rgba(58,35,12,0.3)`.
+
+### Typography
+
+- **Headings**: `MedievalSharp` or `Cinzel` (Google Fonts) — serif with Roman/inscribed feel
+- **Body**: `IM Fell English` or `Lora` — readable old-style serif
+- **UI labels / badges**: `Cinzel Decorative` for small caps feel on status labels
+- **Avoid**: sans-serif fonts anywhere in the main UI (exception: code/debug output only)
+
+### Components
+
+- **Cards**: Look like torn or cut parchment pieces. Slightly uneven border radius (`border-radius: 2px 4px 3px 5px`). Faint inner shadow to simulate paper depth.
+- **Buttons**: Primary buttons look like wax seals or stamped leather — deep red with embossed text effect (`text-shadow: 0 1px 0 rgba(0,0,0,0.4)`). Secondary buttons look like ink stamps.
+- **Status badges**: Hand-stamped look. `PENDING` = faded blue ink, `IN_PROGRESS` = amber, `COMPLETED` = forest green ink, `REJECTED` = faded red with strikethrough feel.
+- **Forms**: Input fields look like lines ruled on parchment — bottom border only, no box border. Labels above in small caps.
+- **Navbar**: Looks like a carved wooden beam or stone lintel across the top. Dark walnut `#2c1a0e` background with gold lettering.
+- **Admin dashboard**: Resembles a guild ledger — tabular, dense, ruled lines between rows, column headers in small caps.
+
+### Decorative Details
+
+- Section dividers: SVG quill-drawn horizontal rules — a line with small flourishes at the ends
+- Page headers: decorative drop cap on the first letter (CSS `::first-letter`)
+- Subtle corner ornaments on modal/card borders (CSS or inline SVG)
+- Scrollbars: styled to match (thin, brown track, sepia thumb)
+- Login page: large centred emblem/crest above the Discord login button — can be an SVG anvil or forge icon
+
+### Micro-interactions
+
+- Button hover: slight parchment-crinkle scale (`transform: scale(1.02)`) + deepen shadow
+- Page transitions: fade in like ink bleeding into parchment (`opacity: 0 → 1, 300ms ease`)
+- Form submission: brief "wax seal" stamp animation on the submit button
+- Status badge updates: cross-fade between colours
+
+### shadcn/ui Theming
+
+Override shadcn CSS variables in `client/src/index.css` to match the parchment palette:
+
+```css
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+
+:root {
+  --background: #f4e4bc;
+  --foreground: #1a0f00;
+  --card: #f0d9a8;
+  --card-foreground: #3b2a1a;
+  --primary: #8b1a1a;
+  --primary-foreground: #f4e4bc;
+  --secondary: #e8d09a;
+  --secondary-foreground: #3b2a1a;
+  --muted: #dfc88e;
+  --muted-foreground: #7a5c3a;
+  --accent: #c9952a;
+  --accent-foreground: #1a0f00;
+  --destructive: #6b0f0f;
+  --border: #c4a96a;
+  --input: #e8d09a;
+  --ring: #c9952a;
+  --radius: 0.25rem;
+
+  --font-heading: 'Cinzel', serif;
+  --font-body: 'IM Fell English', serif;
+}
+```
+
+---
+
+## Key Implementation Notes
+
+1. **`FIREBASE_PRIVATE_KEY` on Render**: The private key is stored with literal `\n` characters. Always replace before use:
+   ```ts
+   privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
+   ```
+
+2. **User role on re-login**: Use `update()` not `set()` on the user record so the role is never overwritten after first login:
+   ```ts
+   const existing = await userRef.once('value');
+   await userRef.update({
+     username, avatar, updatedAt,
+     ...(!existing.exists() && { role: 'USER', createdAt: Date.now() }),
+   });
+   ```
+
+3. **Vite proxy in dev**: `vite.config.ts` proxies `/api` to `localhost:3000` so the client never needs to know the Express port.
+
+4. **Express serves React in production**: After `npm run build` compiles both client and server, Express serves `client/dist/` as static files and falls back to `index.html` for all non-API routes.
+
+5. **TanStack Query for all API calls**: Don't use raw `fetch`/`axios` in components — wrap in query/mutation hooks in `hooks/useOrders.ts` etc.
+
+6. **Firebase ID Token in API requests**: After `signInWithCustomToken`, get the ID token via `auth.currentUser.getIdToken()` and attach it as `Authorization: Bearer <token>` on every API request. Set this up in `client/src/lib/api.ts` as an axios interceptor.
+
+---
+
+## Scripts
+
+### Root `package.json`
+
+```json
+{
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build": "cd client && npm run build && cd ../server && npm run build",
+    "start": "cd server && npm run start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  }
+}
+```
+
+### Render Build & Start
+
+- **Build command**: `npm run build`
+- **Start command**: `npm run start`
+
+---
+
+## Out of Scope (for now)
+
+- Email notifications
+- File/image uploads on orders
+- Discord bot integration
+- Payment handling
+- Mobile app
