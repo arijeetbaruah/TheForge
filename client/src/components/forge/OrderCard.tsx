@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Order } from '../../types/order';
 import StatusBadge from './StatusBadge';
-import { Shield, Sword, FlaskConical, Scroll, Gem, HelpCircle } from 'lucide-react';
+import { Shield, Sword, FlaskConical, Scroll, HelpCircle } from 'lucide-react';
 
 interface OrderCardProps {
   order: Order;

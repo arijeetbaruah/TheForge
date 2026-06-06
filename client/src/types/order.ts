@@ -30,3 +30,14 @@ export interface Order {
   createdAt: number;
   updatedAt: number;
 }
+
+export interface CreateOrderInput {
+  discordId: string;
+  character: string;
+  category: 'Weapon' | 'Armor' | 'Consumable' | 'Poison';
+  baseItem: string;
+  enchantment: string;
+  quantity: number;
+  providingBaseItem: boolean;
+  specialRequests: string | null;
+}

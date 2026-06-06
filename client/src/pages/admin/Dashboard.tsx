@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrders } from '../../hooks/useOrders';
 import StatusBadge from '../../components/forge/StatusBadge';
-import { Shield, Sword, FlaskConical, Scroll, Gem, HelpCircle, Eye, BookOpen } from 'lucide-react';
+import { Shield, Sword, FlaskConical, Scroll, HelpCircle, Eye, BookOpen } from 'lucide-react';
 import { Category, OrderStatus } from '../../types/order';
 
 export const Dashboard: React.FC = () => {

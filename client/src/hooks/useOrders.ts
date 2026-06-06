@@ -34,7 +34,7 @@ export interface CreateOrderInput {
 
 export const useCreateOrder = () => {
   const queryClient = useQueryClient();
-  return useMutation({
+  return useMutation<void, Error, CreateOrderInput>({
     mutationFn: async (data: CreateOrderInput) => {
       const response = await api.post('/orders', data);
       return response.data;

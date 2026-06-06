@@ -3,7 +3,7 @@ import {NavigateFunction, useNavigate} from 'react-router-dom';
 import {useForm, UseFormReturn, useWatch} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {z} from 'zod';
-import {useCreateOrder} from '../../hooks/useOrders';
+import {CreateOrderInput, useCreateOrder} from '../../hooks/useOrders';
 import {Hammer} from 'lucide-react';
 import {UseMutationResult} from '@tanstack/react-query';
 import api from '../../lib/api';
@@ -15,7 +15,7 @@ const requestSchema = z.object({
   character: z.string().min(2, 'Enter Character'),
   category: z.enum(['Weapon', 'Armor', 'Consumable', 'Poison']),
   baseItem: z.string(),
-  enchantment: z.string().optional(),
+  enchantment: z.string(),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1.'),
   providingBaseItem: z.boolean(),
   specialRequests: z.string().optional().transform(v => v || null),
@@ -115,7 +115,7 @@ interface SheetDataResponse {
 interface RequestFormProps {
   navigate: NavigateFunction;
   form: UseFormReturn<RequestFormData>;
-  createOrderMutation: UseMutationResult<void, Error, RequestFormData>;
+  createOrderMutation: UseMutationResult<void, Error, CreateOrderInput>;
   selectedCategory: Category;
   watchedValues: {
     baseItem: string;
@@ -162,7 +162,7 @@ class RequestFormClass extends React.Component<RequestFormProps, RequestFormStat
 
   private handleSubmit = (data: RequestFormData) => {
     const { navigate, createOrderMutation } = this.props;
-    createOrderMutation.mutate(data, {
+    createOrderMutation.mutate(data as unknown as CreateOrderInput, {
       onSuccess: () => navigate('/orders'),
     });
   };
@@ -482,6 +482,7 @@ const RequestForm: React.FC = () => {
       baseItem: '',
       enchantment: '',
       quantity: 1,
+      providingBaseItem: false,
       specialRequests: '',
     },
   });

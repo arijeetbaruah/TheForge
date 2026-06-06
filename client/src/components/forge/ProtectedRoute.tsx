@@ -7,7 +7,7 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, profile, loading, isMember } = useAuth();
+  const { user, profile, loading } = useAuth();
 
   if (loading) {
     return (
