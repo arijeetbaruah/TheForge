@@ -51,11 +51,8 @@ export const UsersList: React.FC = () => {
       <div className="mb-10 border-b border-border/30 pb-6">
         <h1 className="font-heading text-3xl font-bold tracking-widest text-[#1a0f00] flex items-center gap-3">
           <Users className="w-8 h-8 text-primary" />
-          THE GUILD ROLL OF NAMES
+          Client List
         </h1>
-        <p className="text-sm italic text-muted-foreground mt-1">
-          "Manage access rights and promotion. Travelers (USER) must be elevated to Members (MEMBER) to commission the forge."
-        </p>
       </div>
 
       {/* Members List Ledger */}

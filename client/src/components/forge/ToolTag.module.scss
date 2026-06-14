@@ -1,0 +1,23 @@
+﻿.tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+
+  &.artisan {
+    background-color: #4a2e0a;
+    color: #f5c97a;
+    border-color: #7a4e1a;
+  }
+}
+
+.toolsCell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: flex-start;
+}

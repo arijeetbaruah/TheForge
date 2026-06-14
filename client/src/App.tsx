@@ -6,6 +6,7 @@ import RequestForm from './pages/public/RequestForm';
 import Dashboard from './pages/admin/Dashboard';
 import OrderDetail from './pages/public/OrderDetail.tsx';
 import UsersList from './pages/admin/UsersList.tsx';
+import Members from './pages/admin/Members.tsx';
 import ProtectedRoute from './components/forge/ProtectedRoute';
 import AdminRoute from './components/forge/AdminRoute';
 import Navbar from './components/forge/Navbar';
@@ -34,6 +35,7 @@ export const App: React.FC = () => {
               <Route path="/admin" element={<Dashboard />} />
               <Route path="/admin/orders/:id" element={<OrderDetail />} />
               <Route path="/admin/users" element={<UsersList />} />
+              <Route path="/admin/members" element={<Members />} />
             </Route>
 
             {/* Fallback */}
