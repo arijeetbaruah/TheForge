@@ -48,7 +48,7 @@ the-forge/
         admin/
           Dashboard.tsx       ← order queue overview
           OrderDetail.tsx     ← single order management
-          Members.tsx         ← manage user roles
+          UsersList.tsx         ← manage user roles
       components/
         ui/                   ← shadcn/ui primitives
         forge/

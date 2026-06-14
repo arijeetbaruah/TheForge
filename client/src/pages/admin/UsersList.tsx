@@ -3,7 +3,7 @@ import { useUsers, useUpdateUserRole } from '../../hooks/useOrders';
 import { useAuth } from '../../hooks/useAuth';
 import { ShieldCheck, Users, ArrowUp, ArrowDown } from 'lucide-react';
 
-export const Members: React.FC = () => {
+export const UsersList: React.FC = () => {
   const { data: users, isLoading, error } = useUsers();
   const { profile: currentUser } = useAuth();
   const updateRoleMutation = useUpdateUserRole();
@@ -164,4 +164,4 @@ export const Members: React.FC = () => {
   );
 };
 
-export default Members;
+export default UsersList;

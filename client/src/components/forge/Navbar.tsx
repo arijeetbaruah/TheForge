@@ -57,10 +57,16 @@ export const Navbar: React.FC = () => {
                     ADMIN DASHBOARD
                   </Link>
                   <Link
-                    to="/admin/members"
-                    className={`px-3 py-1 border-b-2 transition-all duration-200 ${isActive('/admin/members')}`}
+                      to="/admin/members"
+                      className={`px-3 py-1 border-b-2 transition-all duration-200 ${isActive('/admin/members')}`}
                   >
-                    MEMBERS
+                    Members
+                  </Link>
+                  <Link
+                    to="/admin/users"
+                    className={`px-3 py-1 border-b-2 transition-all duration-200 ${isActive('/admin/users')}`}
+                  >
+                    Users
                   </Link>
                 </>
               )}
