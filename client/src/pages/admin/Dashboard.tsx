@@ -4,6 +4,7 @@ import { useOrders } from '../../hooks/useOrders';
 import StatusBadge from '../../components/forge/StatusBadge';
 import { Shield, Sword, FlaskConical, Scroll, HelpCircle, Eye, BookOpen } from 'lucide-react';
 import { Category, OrderStatus } from '../../types/order';
+import _ from "underscore";
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -33,16 +34,34 @@ export const Dashboard: React.FC = () => {
   }
 
   // Filter orders
-  const filteredOrders = (orders || []).filter((order) => {
-    const categoryMatch = selectedCategory === 'ALL' || order.category === selectedCategory;
-    const statusMatch = selectedStatus === 'ALL' || order.status === selectedStatus;
-    const searchMatch =
-      order.baseItem.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.enchantment.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.discordUsername.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.character.toLowerCase().includes(searchTerm.toLowerCase())
-    return categoryMatch && statusMatch && searchMatch;
-  });
+  // @ts-ignore
+  const filteredOrders = _.chain((orders.data || []))
+      .where((order: any) => {
+        const categoryMatch = selectedCategory === 'ALL' || order.category === selectedCategory;
+        const statusMatch = selectedStatus === 'ALL' || order.status === selectedStatus;
+        const searchMatch =
+          order.baseItem.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order.enchantment.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order.discordId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order.character.toLowerCase().includes(searchTerm.toLowerCase())
+        return categoryMatch && statusMatch && searchMatch;
+      })
+      .sortBy((order:any) => {
+        switch (order.status.toUpperCase()) {
+          case 'PENDING':
+            return 0
+          case 'INPROGRESS':
+            return 5;
+          case 'COMPLETED':
+            return 10;
+
+          default:
+            return 100;
+        }
+      })
+      .value();
+
+  console.log(filteredOrders);
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -158,17 +177,17 @@ export const Dashboard: React.FC = () => {
                 </td>
               </tr>
             ) : (
-              filteredOrders.map((order) => (
+              _.map(filteredOrders, (order:any) => (
                 <tr
                   key={order.id}
                   className="hover:bg-[#e8d09a]/20 transition-colors cursor-pointer"
-                  onClick={() => navigate(`/admin/orders/${order.id}`)}
+                  onClick={() => navigate(`/admin/orders/${order.taskId}`)}
                 >
                   <td className="py-4 px-6 font-semibold text-[#1a0f00]">
                     {order.discordUsername}
                   </td>
                   <td className="py-4 px-6">
-                    <div className="font-semibold text-[#1a0f00] line-clamp-1">{order.enchantment} - {order.baseItem}</div>
+                    <div className="font-semibold text-[#1a0f00] line-clamp-1">{_.isEmpty(order.enchantment) || order.enchantment === '-' ? (order.baseItem) : order.enchantment + " " + order.baseItem}</div>
                   </td>
                   <td className="py-4 px-6">
                     <span className="flex items-center gap-1.5 text-xs font-heading tracking-wider">

@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { useOrders } from '../../hooks/useOrders';
 import OrderCard from '../../components/forge/OrderCard';
 import { Plus, Info, BookOpen } from 'lucide-react';
-import { Category, OrderStatus } from '../../types/order';
+import {Category, Order, OrderStatus} from '../../types/order';
+import _ from 'underscore'
 
 export const MyOrders: React.FC = () => {
-  const { data: orders, isLoading, error } = useOrders();
+  const { data, isLoading, error } = useOrders();
+
   const [selectedCategory, setSelectedCategory] = useState<Category | 'ALL'>('ALL');
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus | 'ALL'>('ALL');
 
@@ -30,12 +32,31 @@ export const MyOrders: React.FC = () => {
     );
   }
 
+  // @ts-ignore
+  const orders = data.data;
+
   // Filter orders
-  const filteredOrders = (orders || []).filter((order) => {
-    const categoryMatch = selectedCategory === 'ALL' || order.category === selectedCategory;
-    const statusMatch = selectedStatus === 'ALL' || order.status === selectedStatus;
-    return categoryMatch && statusMatch;
-  });
+  const filteredOrders = _.chain(orders)
+      .where((order: any) => {
+        const categoryMatch = selectedCategory === 'ALL' || order.category === selectedCategory;
+        const statusMatch = selectedStatus === 'ALL' || order.status === selectedStatus;
+        return categoryMatch && statusMatch;
+      })
+      .sortBy((order: any) => {
+        switch (order.status.toUpperCase()) {
+          case 'PENDING':
+            return 0
+          case 'INPROGRESS':
+            return 5;
+          case 'COMPLETED':
+            return 10;
+
+          default:
+            return 100;
+        }
+      }).value();
+
+  console.log(filteredOrders);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -123,7 +144,7 @@ export const MyOrders: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredOrders.map((order) => (
+          {_.map(filteredOrders, (order: any) => (
             <OrderCard key={order.id} order={order} />
           ))}
         </div>

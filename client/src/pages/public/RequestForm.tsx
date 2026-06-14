@@ -163,7 +163,7 @@ class RequestFormClass extends React.Component<RequestFormProps, RequestFormStat
   private handleSubmit = (data: RequestFormData) => {
     const { navigate, createOrderMutation } = this.props;
     createOrderMutation.mutate(data as unknown as CreateOrderInput, {
-      onSuccess: () => navigate('/orders'),
+      onSuccess: () => {},
     });
   };
 

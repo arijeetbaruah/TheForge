@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Order } from '../../types/order';
+import {OrderDetail} from '../../types/order';
 import StatusBadge from './StatusBadge';
 import { Shield, Sword, FlaskConical, Scroll, HelpCircle } from 'lucide-react';
 
 interface OrderCardProps {
-  order: Order;
+  order: OrderDetail;
   isAdmin?: boolean;
 }
 
@@ -58,9 +58,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, isAdmin = false }) 
         {order.enchantment} {order.baseItem}
       </h3>
 
-      {order.discordUsername && isAdmin && (
+      {order.discordId && isAdmin && (
         <div className="text-xs text-muted-foreground mb-2 relative z-10">
-          Client: <span className="font-semibold text-foreground">{order.discordUsername}</span>
+          Client: <span className="font-semibold text-foreground">{order.discordId}</span>
         </div>
       )}
 

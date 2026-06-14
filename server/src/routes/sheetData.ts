@@ -1,4 +1,5 @@
 ﻿import { Router, Response, Request } from 'express';
+import axios from "axios";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -64,13 +65,15 @@ router.get('/', async (req: Request, res: Response) => {
     }
 
     try {
-        const response = await fetch(appsScriptUrl);
+        const response = await axios.get(appsScriptUrl, {
+            params: { type: "SHEETDATA" }
+        });
 
-        if (!response.ok) {
+        if (response.status != 200) {
             throw new Error(`Apps Script responded with status ${response.status}`);
         }
 
-        const data: SheetDataResponse = await response.json() as SheetDataResponse;
+        const data: SheetDataResponse = await response.data as SheetDataResponse;
 
         // Attach tier pricing to each enchantment
         data.enchantments = data.enchantments.map((enchantment) => {

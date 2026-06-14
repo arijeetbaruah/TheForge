@@ -48,6 +48,7 @@ export const useCreateOrder = () => {
 export interface UpdateOrderInput {
   id: string;
   status: OrderStatus;
+  assignee: string | null;
   adminNote: string | null;
   internalNote: string | null;
 }

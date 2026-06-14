@@ -13,6 +13,7 @@ api.interceptors.request.use(
         // Force refresh if token is close to expiry
         const token = await user.getIdToken();
         config.headers.Authorization = `Bearer ${token}`;
+        config.headers['Cache-Control'] = 'no-cache';
       } catch (error) {
         console.error('Error fetching ID token:', error);
       }

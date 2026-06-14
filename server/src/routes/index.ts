@@ -3,6 +3,7 @@ import authRouter from './auth';
 import ordersRouter from './orders';
 import usersRouter from './users';
 import sheetData from './sheetData';
+import members from './members';
 
 const router = Router();
 
@@ -15,5 +16,6 @@ router.use('/auth', authRouter);
 router.use('/orders', ordersRouter);
 router.use('/users', usersRouter);
 router.use('/sheetdata', sheetData);
+router.use('/members', members);
 
 export default router;

@@ -37,7 +37,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
         justifyContent: 'center',
       }}
     >
-      {status.replace('_', ' ')}
+      {status}
     </span>
   );
 };
