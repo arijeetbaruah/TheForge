@@ -7,6 +7,7 @@ import {CreateOrderInput, useCreateOrder} from '../../hooks/useOrders';
 import {Hammer} from 'lucide-react';
 import {UseMutationResult} from '@tanstack/react-query';
 import api from '../../lib/api';
+import { CurrencyAmount } from '../../lib/Currency'
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -23,70 +24,6 @@ const requestSchema = z.object({
 
 type RequestFormData = z.infer<typeof requestSchema>;
 type Category = RequestFormData['category'];
-
-class Currency {
-  Amount: number;
-  Type: string;
-
-  constructor(amount: number, type: string) {
-    this.Amount = amount;
-    this.Type = type;
-
-    this.convertToGp();
-  }
-
-  convertToGp(){
-    switch(this.Type){
-      case "pp":
-        this.Amount *= 10;
-        break;
-      case "ep":
-        this.Amount *= 0.5;
-        break;
-      case "sp":
-        this.Amount *= 0.1;
-        break;
-      case "cp":
-        this.Amount *= 0.01;
-        break;
-    }
-
-    this.Type = "gp";
-  }
-
-  add(other: Currency): Currency{
-    return new Currency(this.Amount + other.Amount, "gp");
-  }
-
-  multiply(val: number): Currency{
-    return new Currency(this.Amount * val, this.Type);
-  }
-
-  toString(): string{
-    let remainder = this.Amount;
-
-    // 2. Extract Gold (1 gp = 1 gp)
-    const gp = Math.floor(remainder);
-    remainder = remainder % 1;
-
-    // 3. Convert remaining decimal fraction directly to absolute copper pieces
-    // Using Math.round eliminates JavaScript floating-point binary math errors
-    const totalRemainingCp = Math.round(remainder * 100);
-
-    // 4. Extract Silver (1 sp = 10 cp) and remaining Copper
-    const sp = Math.floor(totalRemainingCp / 10);
-    const cp = totalRemainingCp % 10;
-
-    // 5. Construct a dynamic string array filtering out empty denominations
-    const coinParts: string[] = [];
-    if (gp > 0) coinParts.push(`${gp} gp`);
-    if (sp > 0) coinParts.push(`${sp} sp`);
-    if (cp > 0) coinParts.push(`${cp} cp`);
-
-    // 6. Join parts or return a default empty string representation
-    return coinParts.length > 0 ? coinParts.join(", ") : "0 gp";
-  }
-}
 
 // ─── Sheet Data Types ─────────────────────────────────────────────────────────
 
@@ -166,6 +103,24 @@ class RequestFormClass extends React.Component<RequestFormProps, RequestFormStat
       onSuccess: () => {},
     });
   };
+
+  getCurrency(value:number, unit:string): CurrencyAmount {
+    switch (unit) {
+      case 'cp':
+        return CurrencyAmount.fromVector([value, 0, 0, 0, 0]);
+      case 'sp':
+        return CurrencyAmount.fromVector([0, value, 0, 0, 0]);
+      case 'ep':
+        return CurrencyAmount.fromVector([0, 0, value, 0, 0]);
+      case 'gp':
+        return CurrencyAmount.fromVector([0, 0, 0, value, 0]);
+      case 'pp':
+        return CurrencyAmount.fromVector([0, 0, 0, 0, value]);
+
+      default:
+        return CurrencyAmount.fromCp(0);
+    }
+  }
 
   render() {
     const { form, createOrderMutation, selectedCategory } = this.props;
@@ -388,10 +343,11 @@ class RequestFormClass extends React.Component<RequestFormProps, RequestFormStat
               const baseItemPriceUnit = foundItem?.PriceUnit ?? 'gp';
               const enchantpriceUnit = foundEnchantment?.PriceUnit ?? 'gp';
 
-              const baseItemPrice:Currency = new Currency(baseUnitCost, baseItemPriceUnit);
-              const enchantmentPrice:Currency = new Currency(enchantCost, enchantpriceUnit);
+              const baseItemPrice:CurrencyAmount = this.getCurrency(baseUnitCost, baseItemPriceUnit);
+              const enchantmentPrice:CurrencyAmount = this.getCurrency(enchantCost, enchantpriceUnit);
 
-              const totalCost:Currency = baseItemPrice.add(enchantmentPrice).multiply(quantity);
+              let totalCost:CurrencyAmount = baseItemPrice.add(enchantmentPrice).multiply(quantity);
+              totalCost = totalCost.normalize();
 
               const rows: [string, string][] = [
                 ['Client Name',        character     || 'Unknown Hero'],

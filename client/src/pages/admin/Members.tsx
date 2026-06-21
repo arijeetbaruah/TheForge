@@ -1,10 +1,12 @@
 ﻿import React from 'react';
+import {NavigateFunction, useNavigate} from 'react-router-dom';
 import { Search, Users, X } from "lucide-react";
 import { ArtisanTool, Member, OtherTool, GamingSet, MusicalInstrument, ToolProficiency } from '../../types/member.ts'
 import _ from 'lodash';
 import { useMembers } from "../../hooks/useMembers.ts";
 import ToolTag from "../../components/forge/ToolTag.tsx";
 import style from '../../components/forge/ToolTag.module.scss'
+import MemberEditForm from "../public/MemberEditForm.tsx";
 
 // ── Filter Types ──────────────────────────────────────────────
 
@@ -46,6 +48,8 @@ interface MembersProps {
     members: Member[];
     isLoading: boolean;
     error: Error | null;
+
+    onEditClick: (value:number) => void;
 }
 
 interface MembersStates {
@@ -62,6 +66,7 @@ class MembersInner extends React.Component<MembersProps, MembersStates> {
 
     constructor(props: MembersProps) {
         super(props);
+
         this.state = {
             filters: DEFAULT_FILTERS,
             toolSearch: '',
@@ -338,10 +343,11 @@ class MembersInner extends React.Component<MembersProps, MembersStates> {
                             </tr>
                         )}
 
-                        {_.map(filtered, (member: Member) => (
+                        {_.map(filtered, (member: Member, index: number) => (
                             <tr
                                 className="hover:bg-[#e8d09a]/20 transition-colors cursor-pointer"
                                 key={member.Name}
+                                onClick={() => this.props.onEditClick(index)}
                             >
                                 <td className="py-4 px-6 font-semibold text-[#1a0f00]">{member.Name}</td>
                                 <td className="py-4 px-6">
@@ -369,12 +375,49 @@ const Members: React.FC = () => {
     const { data: membersData, isLoading, error } = useMembers();
     const members = (membersData as Member[]) ?? [];
 
+    const [isEditing, setIsEditing] = React.useState(false);
+    const [isSaving, setIsSaving]   = React.useState(false);
+    const [selectedMember, setSelectedMember] = React.useState(-1);
+
+    let member:Member|undefined = undefined;
+    if (isEditing) {
+        member  = members[Number(selectedMember)];
+    }
+
+    const handleSave = async (updated: Member) => {
+        setIsSaving(true);
+        try {
+            // TODO: call your update API here, e.g.:
+            // await updateMember(Number(id), updated);
+            console.log('Saving member:', updated);
+        } finally {
+            setIsSaving(false);
+            setIsEditing(false);
+        }
+    };
+
     return (
-        <MembersInner
-            members={members}
-            isLoading={isLoading}
-            error={error}
-        />
+        <>
+            <MembersInner
+                members={members}
+                isLoading={isLoading}
+                error={error}
+
+                onEditClick={(value:number) => {
+                    setIsEditing(true);
+                    setSelectedMember(value);
+                }}
+            />
+
+            {isEditing && (
+                <MemberEditForm
+                    member={member as Member}
+                    onSave={handleSave}
+                    onCancel={() => setIsEditing(false)}
+                    isSaving={isSaving}
+                />
+            )}
+        </>
     );
 };
 

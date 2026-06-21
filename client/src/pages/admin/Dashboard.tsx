@@ -139,11 +139,8 @@ export const Dashboard: React.FC = () => {
             >
               <option value="ALL">ALL STATUSES</option>
               <option value="PENDING">PENDING</option>
-              <option value="ACCEPTED">ACCEPTED</option>
               <option value="IN_PROGRESS">IN PROGRESS</option>
-              <option value="READY">READY</option>
               <option value="COMPLETED">COMPLETED</option>
-              <option value="REJECTED">REJECTED</option>
             </select>
           </div>
         </div>

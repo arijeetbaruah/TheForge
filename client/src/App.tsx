@@ -10,6 +10,7 @@ import Members from './pages/admin/Members.tsx';
 import ProtectedRoute from './components/forge/ProtectedRoute';
 import AdminRoute from './components/forge/AdminRoute';
 import Navbar from './components/forge/Navbar';
+import MemberDetail from "./pages/public/MemberDetail.tsx";
 
 export const App: React.FC = () => {
   return (
@@ -36,6 +37,7 @@ export const App: React.FC = () => {
               <Route path="/admin/orders/:id" element={<OrderDetail />} />
               <Route path="/admin/users" element={<UsersList />} />
               <Route path="/admin/members" element={<Members />} />
+              <Route path="/admin/members/:id" element={<MemberDetail />} />
             </Route>
 
             {/* Fallback */}

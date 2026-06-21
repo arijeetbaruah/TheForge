@@ -33,28 +33,46 @@ export const MyOrders: React.FC = () => {
   }
 
   // @ts-ignore
-  const orders = data.data;
+  const orders = _.chain(data.data)
+      .map((order: any): Order | undefined => {
+        switch (order.status) {
+          case 'Pending':
+            order.status = OrderStatus.Pending;
+            break;
+          case 'InProgress':
+            order.status = OrderStatus.InProgress;
+            break;
+          case 'Completed':
+            order.status = OrderStatus.Completed;
+            break;
+          default:
+            break
+        }
+        return order as Order;
+      })
+      .compact()
+      .value();
 
   // Filter orders
   const filteredOrders = _.chain(orders)
-      .where((order: any) => {
+      .filter((order: Order) => {
         const categoryMatch = selectedCategory === 'ALL' || order.category === selectedCategory;
         const statusMatch = selectedStatus === 'ALL' || order.status === selectedStatus;
         return categoryMatch && statusMatch;
       })
-      .sortBy((order: any) => {
-        switch (order.status.toUpperCase()) {
-          case 'PENDING':
-            return 0
-          case 'INPROGRESS':
+      .sortBy((order: Order) => {
+        switch (order.status) {
+          case OrderStatus.Pending:
+            return 0;
+          case OrderStatus.InProgress:
             return 5;
-          case 'COMPLETED':
+          case OrderStatus.Completed:
             return 10;
-
           default:
             return 100;
         }
-      }).value();
+      })
+      .value();
 
   console.log(filteredOrders);
 
@@ -112,12 +130,10 @@ export const MyOrders: React.FC = () => {
               className="bg-card text-card-foreground border border-border rounded-sm py-1 px-3 focus:outline-none focus:ring-1 focus:ring-accent font-heading text-xs tracking-wider"
             >
               <option value="ALL">ALL STATUSES</option>
-              <option value="PENDING">PENDING</option>
-              <option value="ACCEPTED">ACCEPTED</option>
-              <option value="IN_PROGRESS">IN PROGRESS</option>
-              <option value="READY">READY</option>
-              <option value="COMPLETED">COMPLETED</option>
-              <option value="REJECTED">REJECTED</option>
+              {
+                _.values(OrderStatus)
+                    .map((status) => (<option value={status} key={status}>{status}</option>))
+              }
             </select>
           </div>
         </div>
