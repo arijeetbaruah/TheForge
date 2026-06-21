@@ -3,10 +3,11 @@ import {NavigateFunction, useNavigate} from 'react-router-dom';
 import { Search, Users, X } from "lucide-react";
 import { ArtisanTool, Member, OtherTool, GamingSet, MusicalInstrument, ToolProficiency } from '../../types/member.ts'
 import _ from 'lodash';
-import { useMembers } from "../../hooks/useMembers.ts";
+import {addMember, updateMember, useMembers} from "../../hooks/useMembers.ts";
 import ToolTag from "../../components/forge/ToolTag.tsx";
 import style from '../../components/forge/ToolTag.module.scss'
 import MemberEditForm from "../public/MemberEditForm.tsx";
+import MemberAddForm from "../public/MemberAddForm.tsx";
 
 // ── Filter Types ──────────────────────────────────────────────
 
@@ -50,6 +51,7 @@ interface MembersProps {
     error: Error | null;
 
     onEditClick: (value:number) => void;
+    onAddClick: () => void;
 }
 
 interface MembersStates {
@@ -207,6 +209,12 @@ class MembersInner extends React.Component<MembersProps, MembersStates> {
                     <p className="text-sm italic text-muted-foreground mt-1">
                         "A record of all guild members, their combat prowess, and craft mastery."
                     </p>
+                    <button
+                        className={"mef-btn mef-btn-save"}
+                        onClick={() => this.props.onAddClick()}
+                    >
+                        Add
+                    </button>
                 </div>
 
                 {/* ── Filter Bar ── */}
@@ -375,24 +383,52 @@ const Members: React.FC = () => {
     const { data: membersData, isLoading, error } = useMembers();
     const members = (membersData as Member[]) ?? [];
 
+    const [isAdding, setisAdding] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
     const [isSaving, setIsSaving]   = React.useState(false);
     const [selectedMember, setSelectedMember] = React.useState(-1);
+    const updateMemberMutation = updateMember();
+    const addMemberMutation = addMember();
 
     let member:Member|undefined = undefined;
     if (isEditing) {
         member  = members[Number(selectedMember)];
     }
 
-    const handleSave = async (updated: Member) => {
+    const handleAddSave = async (member: Member) => {
         setIsSaving(true);
-        try {
-            // TODO: call your update API here, e.g.:
-            // await updateMember(Number(id), updated);
-            console.log('Saving member:', updated);
+
+        try{
+            addMemberMutation.mutate(member, {
+                onSuccess: () => {
+                    alert('Member added successfully.');
+                },
+                onError: (err: Error) => {
+                    console.log(err);
+                }
+            });
         } finally {
             setIsSaving(false);
             setIsEditing(false);
+            setisAdding(false);
+        }
+    }
+
+    const handleEditSave = async (updated: Member) => {
+        setIsSaving(true);
+        try {
+            updateMemberMutation.mutate(updated, {
+                onSuccess: () => {
+                    alert('Member updated successfully.');
+                },
+                onError: (err: Error) => {
+                    console.log(err);
+                }
+            });
+        } finally {
+            setIsSaving(false);
+            setIsEditing(false);
+            setisAdding(false);
         }
     };
 
@@ -407,12 +443,23 @@ const Members: React.FC = () => {
                     setIsEditing(true);
                     setSelectedMember(value);
                 }}
+                onAddClick={() => {
+                    setisAdding(true);
+                }}
             />
+
+            {isAdding && (
+                <MemberAddForm
+                    onSave={handleAddSave}
+                    onCancel={() => setisAdding(false)}
+                    isSaving={isSaving}
+                />
+            )}
 
             {isEditing && (
                 <MemberEditForm
                     member={member as Member}
-                    onSave={handleSave}
+                    onSave={handleEditSave}
                     onCancel={() => setIsEditing(false)}
                     isSaving={isSaving}
                 />

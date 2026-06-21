@@ -8,7 +8,7 @@ export const useOrders = () => {
     queryKey: ['orders'],
     queryFn: async () => {
       const response = await api.get('/orders/list');
-      return response.data;
+      return response.data.data;
     },
   });
 };

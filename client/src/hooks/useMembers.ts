@@ -13,3 +13,30 @@ export const useMembers = () => {
         },
     });
 };
+
+export const addMember = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (data: Member) => {
+            const response = await api.post('/member', data);
+            return response.data;
+        },
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['members'] });
+        }
+    })
+}
+
+export const updateMember = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (data: Member) => {
+            const response = await api.patch(`/member/${data.Name}`, data);
+            return response.data;
+        },
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['members'] });
+            queryClient.invalidateQueries({ queryKey: ['members', variables.Name] });
+        },
+    })
+}

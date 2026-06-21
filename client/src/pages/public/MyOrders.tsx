@@ -32,8 +32,7 @@ export const MyOrders: React.FC = () => {
     );
   }
 
-  // @ts-ignore
-  const orders = _.chain(data.data)
+  const orders = _.chain(data)
       .map((order: any): Order | undefined => {
         switch (order.status) {
           case 'Pending':

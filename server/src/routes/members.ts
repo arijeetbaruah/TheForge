@@ -1,9 +1,10 @@
 ﻿import { Router, Response, Request } from 'express';
 import axios from "axios";
+import requireAuth from "../middleware/requireAuth";
 
 const router = Router();
 
-interface Member {
+export interface Member {
     Name: string;
     Tools: string;
     STR: number;

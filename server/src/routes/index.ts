@@ -4,6 +4,7 @@ import ordersRouter from './orders';
 import usersRouter from './users';
 import sheetData from './sheetData';
 import members from './members';
+import member from './member';
 
 const router = Router();
 
@@ -17,5 +18,6 @@ router.use('/orders', ordersRouter);
 router.use('/users', usersRouter);
 router.use('/sheetdata', sheetData);
 router.use('/members', members);
+router.use('/member', member);
 
 export default router;
